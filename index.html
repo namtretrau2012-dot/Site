@@ -2,1303 +2,655 @@
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>Mic Hook by Đỗ Quốc Nam — Boost Pro</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🦈 Big Shark Menu v2 — Buff Mic Reverb</title>
 <style>
-  :root{
-    --accent:#ff2d55; --accent2:#7c4dff;
-    --bg:#0a0a12; --card:rgba(30,30,42,.72);
-    --text:#fff; --muted:#b8b8c8;
+  * { box-sizing: border-box; }
+  body {
+    font-family: 'Segoe UI', Roboto, sans-serif;
+    background: #0f172a;
+    color: #e2e8f0;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    margin: 0;
   }
-  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
-  html,body{min-height:100vh;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
-    color:var(--text);background:var(--bg);background-size:cover;background-position:center;
-    background-attachment:fixed;overflow-x:hidden;}
-  body::before{content:'';position:fixed;inset:0;
-    background:linear-gradient(180deg,rgba(10,10,18,.7),rgba(10,10,18,.92));
-    z-index:0;pointer-events:none;}
-  .wrap{position:relative;z-index:1;max-width:520px;margin:0 auto;padding:14px;}
-
-  .header{display:flex;align-items:center;gap:12px;padding:14px;
-    background:rgba(15,15,22,.85);backdrop-filter:blur(18px);
-    border:1px solid rgba(255,255,255,.1);border-radius:18px;
-    margin-bottom:12px;box-shadow:0 8px 30px rgba(0,0,0,.5);}
-  .logo{width:52px;height:52px;border-radius:14px;flex-shrink:0;
-    display:grid;place-items:center;font-weight:900;font-size:18px;color:#fff;
-    background:linear-gradient(135deg,var(--accent),var(--accent2));
-    box-shadow:0 0 20px rgba(255,45,85,.6),inset 0 0 14px rgba(255,255,255,.15);
-    overflow:hidden;position:relative;border:1px solid rgba(255,255,255,.2);}
-  .logo::after{content:'';position:absolute;inset:0;
-    background:linear-gradient(135deg,rgba(255,255,255,.3),transparent 60%);pointer-events:none;}
-  .title{flex:1;min-width:0;}
-  .title h1{font-size:15px;font-weight:800;line-height:1.1;}
-  .title small{display:block;font-size:10px;color:var(--muted);margin-top:3px;}
-  .tag{font-size:10px;font-weight:900;letter-spacing:2px;padding:5px 9px;border-radius:8px;
-    background:linear-gradient(135deg,var(--accent),var(--accent2));
-    box-shadow:0 0 12px rgba(124,77,255,.65);flex-shrink:0;}
-
-  .tabs{display:flex;gap:6px;margin-bottom:12px;overflow-x:auto;
-    padding-bottom:4px;scrollbar-width:none;}
-  .tabs::-webkit-scrollbar{display:none;}
-  .tab{flex:0 0 auto;padding:8px 12px;border-radius:10px;border:none;
-    font-size:11px;font-weight:700;cursor:pointer;
-    background:rgba(255,255,255,.08);color:var(--muted);
-    transition:.2s;white-space:nowrap;}
-  .tab.active{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;
-    box-shadow:0 4px 14px rgba(255,45,85,.4);}
-
-  .card{background:var(--card);backdrop-filter:blur(14px);
-    border:1px solid rgba(255,255,255,.08);border-radius:16px;
-    padding:14px;margin-bottom:12px;display:none;}
-  .card.show{display:block;}
-  .card h3{font-size:11px;text-transform:uppercase;letter-spacing:1.5px;
-    color:var(--muted);font-weight:700;margin-bottom:10px;}
-
-  .drop{border:2px dashed rgba(255,255,255,.2);border-radius:14px;
-    padding:20px 14px;text-align:center;cursor:pointer;
-    transition:.25s;background:rgba(0,0,0,.2);}
-  .drop:hover,.drop.drag{border-color:var(--accent);background:rgba(255,45,85,.08);}
-  .drop-icon{font-size:32px;margin-bottom:6px;}
-  .drop-text{font-size:13px;font-weight:600;}
-  .drop-hint{font-size:10px;color:var(--muted);margin-top:4px;}
-  input[type=file]{display:none;}
-
-  .track-info{display:flex;align-items:center;gap:10px;padding:10px 12px;
-    background:rgba(0,0,0,.3);border-radius:12px;margin-top:10px;font-size:12px;}
-  .track-info .ic{width:34px;height:34px;border-radius:9px;flex-shrink:0;
-    display:grid;place-items:center;
-    background:linear-gradient(135deg,var(--accent),var(--accent2));font-size:16px;}
-  .track-info .nm{flex:1;min-width:0;}
-  .track-info .nm b{display:block;font-weight:700;font-size:12px;
-    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-  .track-info .nm span{font-size:10px;color:var(--muted);}
-
-  .progress-wrap{display:flex;align-items:center;gap:8px;margin-top:10px;
-    font-size:11px;color:var(--muted);}
-  .progress-bar{flex:1;height:6px;border-radius:6px;background:rgba(255,255,255,.08);
-    cursor:pointer;position:relative;overflow:hidden;}
-  .progress-fill{position:absolute;left:0;top:0;bottom:0;width:0%;
-    background:linear-gradient(90deg,var(--accent),var(--accent2));}
-
-  .controls{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-top:12px;}
-  .ctrl{padding:10px 6px;border-radius:12px;border:none;cursor:pointer;
-    background:rgba(255,255,255,.08);color:#fff;font-size:16px;font-weight:700;
-    transition:.2s;display:grid;place-items:center;}
-  .ctrl:hover{background:rgba(255,255,255,.15);}
-  .ctrl:active{transform:scale(.94);}
-  .ctrl.main{background:linear-gradient(135deg,var(--accent),var(--accent2));
-    box-shadow:0 4px 16px rgba(255,45,85,.45);}
-  .ctrl:disabled{opacity:.35;cursor:not-allowed;}
-
-  .slider-row{margin:12px 0;}
-  .slider-row .top{display:flex;justify-content:space-between;font-size:12px;margin-bottom:6px;}
-  .slider-row .top b{font-weight:700;}
-  .slider-row .top span{color:var(--accent);font-weight:800;font-variant-numeric:tabular-nums;}
-  input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:6px;
-    border-radius:6px;background:rgba(255,255,255,.1);outline:none;cursor:pointer;}
-  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;
-    width:18px;height:18px;border-radius:50%;background:#fff;
-    box-shadow:0 0 10px rgba(255,45,85,.9);cursor:pointer;}
-  input[type=range]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;
-    background:#fff;border:none;box-shadow:0 0 10px rgba(255,45,85,.9);cursor:pointer;}
-
-  .presets{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:6px;}
-  .preset{padding:10px 6px;border-radius:12px;border:1px solid rgba(255,255,255,.1);
-    background:rgba(255,255,255,.05);color:#fff;font-size:11px;font-weight:700;
-    cursor:pointer;transition:.2s;}
-  .preset:hover{background:rgba(255,255,255,.12);}
-  .preset.active{background:linear-gradient(135deg,var(--accent),var(--accent2));
-    border-color:transparent;box-shadow:0 4px 16px rgba(255,45,85,.4);}
-
-  .toggle-row{display:flex;align-items:center;justify-content:space-between;
-    padding:10px 0;border-bottom:1px solid rgba(255,255,255,.05);}
-  .toggle-row:last-child{border-bottom:none;}
-  .toggle-row label{font-size:12px;flex:1;}
-  .toggle-row small{display:block;font-size:10px;color:var(--muted);margin-top:2px;}
-  .switch{position:relative;width:40px;height:22px;flex-shrink:0;}
-  .switch input{position:absolute;opacity:0;width:100%;height:100%;margin:0;cursor:pointer;z-index:2;}
-  .switch span{position:absolute;inset:0;background:#333;border-radius:22px;
-    transition:.25s;pointer-events:none;}
-  .switch span::before{content:'';position:absolute;height:16px;width:16px;left:3px;top:3px;
-    background:#fff;border-radius:50%;transition:.25s;}
-  .switch input:checked+span{background:linear-gradient(135deg,var(--accent),var(--accent2));}
-  .switch input:checked+span::before{transform:translateX(18px);}
-
-  .meter{display:flex;align-items:flex-end;gap:2px;height:32px;margin-top:8px;}
-  .meter .bar{flex:1;border-radius:2px;
-    background:linear-gradient(180deg,var(--accent2),var(--accent));
-    height:10%;opacity:.85;}
-
-  .btn-wide{width:100%;padding:12px;border-radius:12px;border:none;
-    font-size:12px;font-weight:700;cursor:pointer;
-    background:linear-gradient(135deg,var(--accent),var(--accent2));
-    color:#fff;box-shadow:0 4px 16px rgba(255,45,85,.4);
-    transition:.2s;margin-top:8px;}
-  .btn-wide:hover{filter:brightness(1.1);}
-  .btn-wide.dan{background:rgba(255,45,85,.2);color:#ff8aa0;box-shadow:none;}
-  .btn-wide.suc{background:linear-gradient(135deg,#00c853,#00e676);
-    box-shadow:0 4px 16px rgba(0,200,83,.4);}
-  .btn-wide:disabled{opacity:.4;cursor:not-allowed;filter:none;}
-
-  .toast{position:fixed;left:50%;bottom:24px;
-    transform:translateX(-50%) translateY(120%);
-    padding:10px 18px;border-radius:12px;
-    background:rgba(30,30,42,.95);
-    border:1px solid rgba(255,255,255,.15);
-    font-size:12px;font-weight:600;z-index:9999;
-    transition:transform .3s ease;
-    box-shadow:0 8px 30px rgba(0,0,0,.6);backdrop-filter:blur(10px);
-    max-width:90vw;}
-  .toast.show{transform:translateX(-50%) translateY(0);}
-
-  .hint{font-size:10px;color:var(--muted);line-height:1.5;margin-top:8px;}
-  .vocal-badge{display:inline-block;padding:2px 6px;border-radius:6px;font-size:9px;
-    background:linear-gradient(135deg,#ff2d55,#7c4dff);font-weight:900;letter-spacing:1px;
-    margin-left:6px;}
-
-  .footer{text-align:center;font-size:10px;color:var(--muted);padding:12px 0 20px;}
-  .footer b{color:var(--accent);letter-spacing:2px;}
+  .box {
+    background: #1e293b;
+    border: 1px solid #334155;
+    border-radius: 16px;
+    padding: 28px;
+    max-width: 640px;
+    width: 100%;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+  }
+  h1 { font-size: 22px; margin-bottom: 8px; color: #38bdf8; }
+  p { font-size: 14px; color: #94a3b8; line-height: 1.7; margin-bottom: 12px; }
+  ol { padding-left: 20px; font-size: 14px; color: #cbd5e1; line-height: 1.9; }
+  li { margin-bottom: 6px; }
+  code {
+    background: #0f172a;
+    color: #22d3ee;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 13px;
+  }
+  .warn {
+    margin-top: 18px;
+    padding: 12px;
+    background: rgba(239, 68, 68, 0.1);
+    border-left: 4px solid #ef4444;
+    border-radius: 8px;
+    font-size: 13px;
+    color: #fca5a5;
+  }
+  .hint {
+    margin-top: 12px;
+    padding: 12px;
+    background: rgba(34, 197, 94, 0.1);
+    border-left: 4px solid #22c55e;
+    border-radius: 8px;
+    font-size: 13px;
+    color: #86efac;
+  }
+  .kbd {
+    display: inline-block;
+    background: #334155;
+    border: 1px solid #475569;
+    border-bottom-width: 3px;
+    border-radius: 4px;
+    padding: 1px 6px;
+    font-size: 12px;
+    color: #e2e8f0;
+  }
 </style>
 </head>
 <body>
 
-<div class="wrap">
-  <div class="header">
-    <div class="logo">🎛️</div>
-    <div class="title">
-      <h1>Mic Hook by Đỗ Quốc Nam</h1>
-      <small>Boost Pro — Boost · Voice · Split</small>
-    </div>
-    <div class="tag">K I N G</div>
+<div class="box">
+  <h1>🦈 Big Shark Menu v2 đang chạy!</h1>
+  <p>Script đã được nạp. Nút <b>🦈 màu trắng</b> sẽ xuất hiện ở góc trên bên phải màn hình.</p>
+  <ol>
+    <li>Bấm nút <b>🦈</b> để mở/đóng menu Big Shark.</li>
+    <li>Bấm <b>⚡ KÍCH HOẠT BIG SHARK</b> để bật/tắt hiệu ứng (bypass thật).</li>
+    <li>Chọn <b>Preset</b> nhanh: Live · Podcast · Karaoke · Bass · Max.</li>
+    <li>Chỉnh các thanh trượt: Gain Mic, Bass, Mid, Treble, Reverb, Độ dài vang.</li>
+    <li>Vào <b>Messenger web</b> / <b>Discord web</b> / <b>Google Meet</b> → cấp quyền mic → hiệu ứng tự áp dụng.</li>
+  </ol>
+  <div class="warn">
+    ⚠️ <b>Quan trọng:</b> Script chỉ hoạt động khi trang web bạn dùng có gọi <code>getUserMedia()</code>.
+    Nếu không, nút sẽ hiện nhưng không có âm thanh nào bị ảnh hưởng.<br><br>
+    Cách dùng: Mở Console (<span class="kbd">F12</span>) của trang như <code>messenger.com</code> → paste toàn bộ code JS trong file này → Enter.
   </div>
-
-  <div class="tabs">
-    <button class="tab active" data-tab="play">🎵 Nhạc</button>
-    <button class="tab" data-tab="boost">🔊 Boost</button>
-    <button class="tab" data-tab="vocal">🎤 Vocal</button>
-    <button class="tab" data-tab="eq">🎚️ EQ</button>
-    <button class="tab" data-tab="voice">🗣️ Đổi giọng</button>
-    <button class="tab" data-tab="split">✂️ Tách</button>
-    <button class="tab" data-tab="more">⚙️ Khác</button>
+  <div class="hint">
+    💡 <b>Mẹo:</b> Trạng thái ON/OFF và các thông số được <b>tự động lưu</b> vào localStorage. Lần sau mở lại sẽ nhớ cài đặt.
   </div>
-
-  <!-- NHẠC -->
-  <div class="card show" data-tab="play">
-    <h3>📁 Chọn file</h3>
-    <div class="drop" id="drop">
-      <div class="drop-icon">🎵</div>
-      <div class="drop-text">Bấm để chọn nhạc</div>
-      <div class="drop-hint">hoặc kéo thả · MP3 WAV M4A FLAC OGG</div>
-    </div>
-    <input type="file" id="fileInput" accept="audio/*,.mp3,.wav,.m4a,.flac,.ogg,.opus,.aac">
-    <div class="track-info" id="trackInfo" style="display:none;">
-      <div class="ic">🎵</div>
-      <div class="nm">
-        <b id="trackName">Chưa chọn</b>
-        <span id="trackMeta">—</span>
-      </div>
-    </div>
-    <div class="progress-wrap" id="progressWrap" style="display:none;">
-      <span id="timeNow">0:00</span>
-      <div class="progress-bar" id="progressBar"><div class="progress-fill" id="progressFill"></div></div>
-      <span id="timeEnd">0:00</span>
-    </div>
-    <div class="controls">
-      <button class="ctrl" id="btnBack" disabled>⏪</button>
-      <button class="ctrl main" id="btnPlay" disabled>▶</button>
-      <button class="ctrl" id="btnFwd" disabled>⏩</button>
-      <button class="ctrl" id="btnLoop">🔁</button>
-      <button class="ctrl" id="btnDl" disabled>⬇</button>
-    </div>
-    <div class="meter" id="meter"></div>
-  </div>
-
-  <!-- BOOST -->
-  <div class="card" data-tab="boost">
-    <h3>🔊 Âm lượng & Boost cực lớn</h3>
-
-    <div class="slider-row">
-      <div class="top"><b>Volume</b><span id="vVol">100%</span></div>
-      <input type="range" id="sVol" min="0" max="400" value="100">
-    </div>
-
-    <div class="slider-row">
-      <div class="top"><b>Boost (dB)</b><span id="vBoost">0 dB</span></div>
-      <input type="range" id="sBoost" min="0" max="90000" step="100" value="0">
-    </div>
-
-    <div class="slider-row">
-      <div class="top"><b>Gain thô (x)</b><span id="vGain">1.0x</span></div>
-      <input type="range" id="sGain" min="1" max="100" step="0.5" value="1">
-    </div>
-
-    <h3 style="margin-top:14px;">🎚️ Bass / Treble / Freq</h3>
-
-    <div class="slider-row">
-      <div class="top"><b>Bass (dB)</b><span id="vBass">0 dB</span></div>
-      <input type="range" id="sBass" min="0" max="60" value="0">
-    </div>
-
-    <div class="slider-row">
-      <div class="top"><b>Bass Freq (Hz)</b><span id="vBassF">200 Hz</span></div>
-      <input type="range" id="sBassF" min="60" max="500" step="10" value="200">
-    </div>
-
-    <div class="slider-row">
-      <div class="top"><b>Treble (dB)</b><span id="vTreble">0 dB</span></div>
-      <input type="range" id="sTreble" min="-20" max="20" value="0">
-    </div>
-
-    <div class="slider-row">
-      <div class="top"><b>Treble Freq (Hz)</b><span id="vTrebleF">3000 Hz</span></div>
-      <input type="range" id="sTrebleF" min="2000" max="12000" step="100" value="3000">
-    </div>
-
-    <div class="slider-row">
-      <div class="top"><b>Mid (dB)</b><span id="vMid">0 dB</span></div>
-      <input type="range" id="sMid" min="-20" max="20" value="0">
-    </div>
-
-    <div class="slider-row">
-      <div class="top"><b>Mid Freq (Hz)</b><span id="vMidF">1000 Hz</span></div>
-      <input type="range" id="sMidF" min="200" max="5000" step="50" value="1000">
-    </div>
-
-    <h3 style="margin-top:14px;">💥 Saturation / Exciter</h3>
-
-    <div class="slider-row">
-      <div class="top"><b>Saturation</b><span id="vSat">0%</span></div>
-      <input type="range" id="sSat" min="0" max="100" value="0">
-    </div>
-
-    <div class="slider-row">
-      <div class="top"><b>Exciter</b><span id="vExc">0 dB</span></div>
-      <input type="range" id="sExc" min="0" max="20" value="0">
-    </div>
-
-    <h3 style="margin-top:14px;">🎛️ Preset</h3>
-    <div class="presets">
-      <button class="preset active" data-preset="flat">🔘 Gốc</button>
-      <button class="preset" data-preset="live">🎤 Live</button>
-      <button class="preset" data-preset="bass">🔊 Bass</button>
-      <button class="preset" data-preset="club">🎧 Club</button>
-      <button class="preset" data-preset="vocal">🎙️ Vocal</button>
-      <button class="preset" data-preset="max">💥 Max</button>
-    </div>
-  </div>
-
-  <!-- VOCAL BOOST -->
-  <div class="card" data-tab="vocal">
-    <h3>🎤 Vocal Boost <span class="vocal-badge">MỚI</span></h3>
-    <div class="hint" style="margin-bottom:12px;">
-      Khuếch đại riêng vùng giọng hát (300Hz–3kHz) mà không làm to nhạc nền.
-      Dải boost lên tới <b>10000%</b> (100x).
-    </div>
-
-    <div class="toggle-row">
-      <label>Bật Vocal Boost
-        <small>Khuếch đại vùng tần số giọng hát</small></label>
-      <div class="switch"><input type="checkbox" id="vocalOn"><span></span></div>
-    </div>
-
-    <div class="slider-row" style="margin-top:14px;">
-      <div class="top"><b>Vocal Boost (%)</b><span id="vVocalBoost">100%</span></div>
-      <input type="range" id="sVocalBoost" min="0" max="10000" step="10" value="100">
-    </div>
-
-    <div class="slider-row">
-      <div class="top"><b>Vocal Freq trung tâm (Hz)</b><span id="vVocalFreq">1500 Hz</span></div>
-      <input type="range" id="sVocalFreq" min="300" max="3000" step="50" value="1500">
-    </div>
-
-    <div class="slider-row">
-      <div class="top"><b>Q (độ hẹp)</b><span id="vVocalQ">1.0</span></div>
-      <input type="range" id="sVocalQ" min="0.3" max="5" step="0.1" value="1">
-    </div>
-
-    <div class="slider-row">
-      <div class="top"><b>De-esser (giảm S)</b><span id="vDeEss">0 dB</span></div>
-      <input type="range" id="sDeEss" min="0" max="20" value="0">
-    </div>
-
-    <h3 style="margin-top:14px;">🎛️ Preset Vocal</h3>
-    <div class="presets">
-      <button class="preset active" data-vocal="off">🔘 Tắt</button>
-      <button class="preset" data-vocal="soft">🎙️ Nhẹ</button>
-      <button class="preset" data-vocal="strong">🎤 Mạnh</button>
-      <button class="preset" data-vocal="max">💥 Max</button>
-      <button class="preset" data-vocal="insane">🔥 Insane</button>
-      <button class="preset" data-vocal="nuke">☢️ Nuke</button>
-    </div>
-
-    <div class="hint" style="margin-top:12px;">
-      ⚠️ Boost cao có thể gây méo tiếng (clipping). Nên bật <b>Limiter</b> ở tab Khác.
-      Kết hợp với <b>De-esser</b> để giảm tiếng "xì" khi boost mạnh.
-    </div>
-  </div>
-
-  <!-- EQ -->
-  <div class="card" data-tab="eq">
-    <h3>🎚️ EQ 10 băng</h3>
-    <div id="eqBands"></div>
-    <h3 style="margin-top:14px;">🎚️ Preset EQ</h3>
-    <div class="presets">
-      <button class="preset active" data-eq="flat">Phẳng</button>
-      <button class="preset" data-eq="pop">Pop</button>
-      <button class="preset" data-eq="rock">Rock</button>
-      <button class="preset" data-eq="jazz">Jazz</button>
-      <button class="preset" data-eq="classical">Classic</button>
-      <button class="preset" data-eq="custom">Custom</button>
-    </div>
-  </div>
-
-  <!-- VOICE -->
-  <div class="card" data-tab="voice">
-    <h3>🗣️ Đổi giọng file nhạc</h3>
-    <div class="toggle-row">
-      <label>Bật đổi giọng<small>Áp dụng realtime khi phát</small></label>
-      <div class="switch"><input type="checkbox" id="voiceOn"><span></span></div>
-    </div>
-    <div class="presets" style="grid-template-columns:repeat(2,1fr);margin-top:12px;">
-      <button class="preset active" data-voice="none">🎙️ Gốc</button>
-      <button class="preset" data-voice="baby">👶 Em bé</button>
-      <button class="preset" data-voice="child">🧒 Trẻ em</button>
-      <button class="preset" data-voice="female">👩 Nữ</button>
-      <button class="preset" data-voice="male">👨 Nam</button>
-      <button class="preset" data-voice="deep">🎙️ Trầm</button>
-      <button class="preset" data-voice="demon">😈 Quỷ</button>
-      <button class="preset" data-voice="robot">🤖 Robot</button>
-      <button class="preset" data-voice="alien">👽 Alien</button>
-      <button class="preset" data-voice="chipmunk">🐿️ Sóc</button>
-    </div>
-    <div class="slider-row" style="margin-top:14px;">
-      <div class="top"><b>Pitch (nửa cung)</b><span id="vPitch">0</span></div>
-      <input type="range" id="sPitch" min="-12" max="12" step="1" value="0">
-    </div>
-    <div class="slider-row">
-      <div class="top"><b>Tốc độ</b><span id="vRate">1.0x</span></div>
-      <input type="range" id="sRate" min="0.5" max="2" step="0.05" value="1">
-    </div>
-    <div class="slider-row">
-      <div class="top"><b>Formant</b><span id="vFormant">0</span></div>
-      <input type="range" id="sFormant" min="-10" max="10" step="0.5" value="0">
-    </div>
-    <div class="slider-row">
-      <div class="top"><b>Robot (ring mod)</b><span id="vRobot">0%</span></div>
-      <input type="range" id="sRobot" min="0" max="100" value="0">
-    </div>
-  </div>
-
-  <!-- SPLIT -->
-  <div class="card" data-tab="split">
-    <h3>✂️ Tách nhạc nền / giọng hát</h3>
-    <div class="presets" style="grid-template-columns:repeat(3,1fr);">
-      <button class="preset active" data-split="off">🔘 Tắt</button>
-      <button class="preset" data-split="vocal">🎤 Giọng hát</button>
-      <button class="preset" data-split="inst">🎵 Nhạc nền</button>
-    </div>
-    <div class="slider-row" style="margin-top:14px;">
-      <div class="top"><b>Độ mạnh tách</b><span id="vSplitAmt">100%</span></div>
-      <input type="range" id="sSplitAmt" min="0" max="100" value="100">
-    </div>
-    <div class="slider-row">
-      <div class="top"><b>Width stereo</b><span id="vWidth">100%</span></div>
-      <input type="range" id="sWidth" min="0" max="200" value="100">
-    </div>
-    <div class="hint">
-      ⚠️ Karaoke-style center-channel removal. Tốt nhất với nhạc stereo chuẩn.
-    </div>
-  </div>
-
-  <!-- KHÁC -->
-  <div class="card" data-tab="more">
-    <h3>⚙️ Khác</h3>
-    <div class="toggle-row">
-      <label>Reverb<small>Thêm không gian</small></label>
-      <div class="switch"><input type="checkbox" id="reverbOn"><span></span></div>
-    </div>
-    <div class="slider-row">
-      <div class="top"><b>Reverb amount</b><span id="vRev">0%</span></div>
-      <input type="range" id="sRev" min="0" max="100" value="0">
-    </div>
-    <div class="toggle-row">
-      <label>Limiter bảo vệ<small>Chặn đỉnh cứng</small></label>
-      <div class="switch"><input type="checkbox" id="limiterOn" checked><span></span></div>
-    </div>
-    <div class="toggle-row">
-      <label>Soft Clip<small>Giảm vỡ tiếng khi boost cao</small></label>
-      <div class="switch"><input type="checkbox" id="softClipOn" checked><span></span></div>
-    </div>
-    <button class="btn-wide dan" id="btnReset">🔄 Reset toàn bộ</button>
-    <button class="btn-wide" id="btnExportAudio" disabled>📥 Xuất audio (đã boost)</button>
-   </div>
-
-  <div class="footer">Made by <b>ĐỖ QUỐC NAM</b> · Tag <b>K I N G</b></div>
 </div>
 
-<div class="toast" id="toast"></div>
-
 <script>
-(function(){
+/* ═══════════════════════════════════════════════════════════════════════
+   🦈 BIG SHARK MENU v2 — BUFF MIC REVERB
+   ───────────────────────────────────────────────────────────────────
+   Tác giả gốc: (bản gốc)
+   Nâng cấp: Bypass thật · Preset · localStorage · Meter · Cleanup
+   ═══════════════════════════════════════════════════════════════════════ */
+(function () {
 'use strict';
 
-// ═══════════════════════════════════════════════════════════════════════════
-//  STATE
-// ═══════════════════════════════════════════════════════════════════════════
-const state = {
-  loop: false,
-  volume: 1.0,
-  boostDB: 0,
-  gain: 1.0,
-  bass: 0, bassFreq: 200,
-  mid: 0, midFreq: 1000,
-  treble: 0, trebleFreq: 3000,
-  sat: 0, exc: 0,
-  eqBands: [0,0,0,0,0,0,0,0,0,0],
-  preset: 'flat',
-  eqPreset: 'flat',
-  vocalOn: false,
-  vocalBoost: 100,
-  vocalFreq: 1500,
-  vocalQ: 1.0,
-  deEss: 0,
-  vocalPreset: 'off',
-  voiceOn: false,
-  voicePreset: 'none',
-  pitch: 0,
-  rate: 1.0,
-  formant: 0,
-  robot: 0,
-  split: 'off',
-  splitAmt: 100,
-  width: 100,
-  reverbOn: false,
-  rev: 0,
-  limiterOn: true,
-  softClipOn: true,
+if (window.__BigSharkMenuV2__) return;
+window.__BigSharkMenuV2__ = true;
+
+/* ─────────── CẤU HÌNH MẶC ĐỊNH ─────────── */
+const DEFAULTS = {
+  inputGain: 30.0,
+  outputGain: 1.8,
+  bassFreq: 80.0,
+  bassGain: 8.0,
+  midFreq: 1000.0,
+  midGain: 6.0,
+  trebleFreq: 6000.0,
+  trebleGain: 3.0,
+  reverbSolo: 1.40,
+  reverbDuration: 3.0
 };
 
-const EQ_FREQS = [32,63,125,250,500,1000,2000,4000,8000,16000];
-const EQ_LABELS = ['32','63','125','250','500','1k','2k','4k','8k','16k'];
+const STORAGE_KEY = 'bigSharkV2_settings';
+let P = Object.assign({}, DEFAULTS);
+try {
+  const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+  P = Object.assign(P, saved);
+} catch (e) {}
 
-// ═══════════════════════════════════════════════════════════════════════════
-//  DOM HELPERS
-// ═══════════════════════════════════════════════════════════════════════════
-const $ = id => document.getElementById(id);
-const toast = $('toast');
-function toastMsg(m){
-  toast.textContent = m;
-  toast.classList.add('show');
-  clearTimeout(toast._t);
-  toast._t = setTimeout(() => toast.classList.remove('show'), 2200);
+function saveSettings() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(P)); } catch (e) {}
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
-//  TABS
-// ═══════════════════════════════════════════════════════════════════════════
-document.querySelectorAll('.tab').forEach(t => {
-  t.addEventListener('click', () => {
-    document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
-    t.classList.add('active');
-    document.querySelectorAll('.card').forEach(c => {
-      c.classList.toggle('show', c.dataset.tab === t.dataset.tab);
+/* ─────────── PRESET ─────────── */
+const PRESETS = {
+  live:    { inputGain: 30, bassGain: 8,  midGain: 6,  trebleGain: 3,  reverbSolo: 1.40, reverbDuration: 3.0 },
+  podcast: { inputGain: 35, bassGain: 5,  midGain: 8,  trebleGain: 5,  reverbSolo: 0.30, reverbDuration: 1.5 },
+  karaoke: { inputGain: 28, bassGain: 10, midGain: 4,  trebleGain: 4,  reverbSolo: 1.80, reverbDuration: 4.0 },
+  bass:    { inputGain: 30, bassGain: 18, midGain: 4,  trebleGain: 2,  reverbSolo: 0.80, reverbDuration: 2.0 },
+  max:     { inputGain: 45, bassGain: 15, midGain: 10, trebleGain: 8,  reverbSolo: 1.60, reverbDuration: 3.5 }
+};
+
+/* ─────────── STATE ─────────── */
+let _ctx = null;
+let _rawStream = null;
+let isActive = false;
+let _nodes = {};
+let _meterRAF = 0;
+
+/* ─────────── UTILS ─────────── */
+function createReverbBuffer(ctx, duration) {
+  const sampleRate = ctx.sampleRate;
+  const length = Math.max(1, Math.floor(sampleRate * duration));
+  const impulse = ctx.createBuffer(2, length, sampleRate);
+  const left = impulse.getChannelData(0);
+  const right = impulse.getChannelData(1);
+  for (let i = 0; i < length; i++) {
+    const n = i / length;
+    const k = Math.pow(1 - n, 1.5);
+    left[i]  = (Math.random() * 2 - 1) * k;
+    right[i] = (Math.random() * 2 - 1) * k;
+  }
+  return impulse;
+}
+
+function getAudioContext() {
+  if (!_ctx) {
+    const AC = window.AudioContext || window.webkitAudioContext;
+    try {
+      _ctx = new AC({ latencyHint: 'interactive', sampleRate: 48000 });
+    } catch (e) {
+      _ctx = new AC({ latencyHint: 'interactive' });
+    }
+  }
+  return _ctx;
+}
+
+/* ─────────── HOOK getUserMedia ─────────── */
+const _nativeGUM = navigator.mediaDevices.getUserMedia.bind(navigator.mediaDevices);
+
+navigator.mediaDevices.getUserMedia = async function (constraints) {
+  // Chuẩn hoá constraints audio
+  if (constraints && constraints.audio) {
+    const ac = typeof constraints.audio === 'object' ? constraints.audio : {};
+    constraints.audio = Object.assign({}, ac, {
+      echoCancellation: false,     // tắt để không triệt reverb
+      noiseSuppression: false,     // tắt để giữ chi tiết giọng
+      autoGainControl: false       // tắt để gain thủ công hoạt động
     });
-  });
-});
-
-// ═══════════════════════════════════════════════════════════════════════════
-//  AUDIO GRAPH
-// ═══════════════════════════════════════════════════════════════════════════
-let audioCtx=null, audioEl=null, srcNode=null;
-let bassNode, midNode, trebleNode, excNode;
-let eqNodes=[];
-let gainNode, gainRawNode, boostNode;
-let satNode;
-let vocalNode, vocalGain, deEssNode;
-let formant1, formant2, robotOsc, robotGain, robotMix;
-let splitSplitter, splitMidGain, splitSideGainL, splitSideGainR, merger;
-let reverbNode, reverbWet, dryNode;
-let limiterNode, softClipNode, analyserNode, destinationNode;
-
-// DOM refs (declared early so initGraph can attach listeners)
-const drop=$('drop'), fileInput=$('fileInput');
-const trackInfo=$('trackInfo'), trackName=$('trackName'), trackMeta=$('trackMeta');
-const progressWrap=$('progressWrap'), progressBar=$('progressBar'), progressFill=$('progressFill');
-const timeNow=$('timeNow'), timeEnd=$('timeEnd');
-const btnPlay=$('btnPlay'), btnBack=$('btnBack'), btnFwd=$('btnFwd');
-const btnLoop=$('btnLoop'), btnDl=$('btnDl');
-
-let currentFileName='';
-let currentObjectURL=null;
-
-// ── Curves ─────────────────────────────────────────────────────────────
-function makeSatCurve(amount){
-  const n=1024, curve=new Float32Array(n), k=amount*100;
-  for(let i=0;i<n;i++){
-    const x=(i*2)/n-1;
-    if(k<0.001){curve[i]=x;continue;}
-    curve[i]=Math.max(-1,Math.min(1,((Math.PI+k)*x)/(Math.PI+k*Math.abs(x))));
-  }
-  return curve;
-}
-
-function makeSoftClipCurve(){
-  const n=1024, curve=new Float32Array(n);
-  for(let i=0;i<n;i++){
-    const x=(i*2)/n-1;
-    curve[i]=Math.tanh(x*1.5);
-  }
-  return curve;
-}
-
-function buildReverbIR(ctx, decay){
-  const sr=ctx.sampleRate;
-  const len=Math.max(1,Math.floor(sr*Math.min(decay,6)));
-  const buf=ctx.createBuffer(2,len,sr);
-  for(let c=0;c<2;c++){
-    const d=buf.getChannelData(c);
-    for(let i=0;i<len;i++)
-      d[i]=(Math.random()*2-1)*Math.pow(1-i/len,2.5);
-  }
-  return buf;
-}
-
-function dbToGain(db){
-  if(!isFinite(db)||db<=0)return 1;
-  const safe=Math.min(db,90000);
-  return Math.min(Math.pow(10,safe/20000),1e6);
-}
-
-function vocalPctToGain(pct){
-  return Math.max(0, pct/100);
-}
-
-// ── Build graph ────────────────────────────────────────────────────────
-function initGraph(){
-  if(audioCtx)return;
-  audioCtx=new (window.AudioContext||window.webkitAudioContext)();
-
-  audioEl=new Audio();
-  audioEl.crossOrigin='anonymous';
-  audioEl.preload='auto';
-  audioEl.playsInline=true;
-
-  // ═══ GẮN LISTENER NGAY TẠI ĐÂY ═══
-  audioEl.addEventListener('play', ()=>btnPlay.textContent='⏸');
-  audioEl.addEventListener('pause',()=>btnPlay.textContent='▶');
-  audioEl.addEventListener('timeupdate',()=>{
-    if(!audioEl.duration || !isFinite(audioEl.duration))return;
-    progressFill.style.width=(audioEl.currentTime/audioEl.duration*100)+'%';
-    timeNow.textContent=fmtTime(audioEl.currentTime);
-  });
-  audioEl.addEventListener('loadedmetadata',()=>{
-    timeEnd.textContent=fmtTime(audioEl.duration);
-  });
-  audioEl.addEventListener('ended',()=>{
-    if(state.loop){audioEl.currentTime=0;audioEl.play();}
-    else btnPlay.textContent='▶';
-  });
-  audioEl.addEventListener('error',()=>{
-    const code = audioEl.error ? audioEl.error.code : '?';
-    const msg = {
-      1:'Tải bị hủy', 2:'Lỗi mạng', 3:'Lỗi giải mã (file hỏng?)', 4:'Định dạng không hỗ trợ'
-    }[code] || 'Lỗi không rõ';
-    toastMsg('❌ '+msg);
-    console.error('Audio error code:', code, audioEl.error);
-  });
-
-  srcNode=audioCtx.createMediaElementSource(audioEl);
-
-  // EQ cơ bản
-  bassNode=audioCtx.createBiquadFilter();
-  bassNode.type='lowshelf'; bassNode.frequency.value=state.bassFreq;
-  bassNode.gain.value=state.bass;
-
-  midNode=audioCtx.createBiquadFilter();
-  midNode.type='peaking'; midNode.Q.value=1;
-  midNode.frequency.value=state.midFreq; midNode.gain.value=state.mid;
-
-  trebleNode=audioCtx.createBiquadFilter();
-  trebleNode.type='highshelf'; trebleNode.frequency.value=state.trebleFreq;
-  trebleNode.gain.value=state.treble;
-
-  excNode=audioCtx.createBiquadFilter();
-  excNode.type='highshelf'; excNode.frequency.value=8000;
-  excNode.gain.value=state.exc;
-
-  // EQ 10 băng
-  eqNodes=EQ_FREQS.map((freq,i)=>{
-    const f=audioCtx.createBiquadFilter();
-    f.type=i===0?'lowshelf':i===9?'highshelf':'peaking';
-    f.frequency.value=freq;
-    f.gain.value=state.eqBands[i]||0;
-    return f;
-  });
-
-  // Saturation
-  satNode=audioCtx.createWaveShaper();
-  satNode.curve=makeSatCurve(state.sat);
-  satNode.oversample='4x';
-
-  // VOCAL BOOST
-  vocalNode=audioCtx.createBiquadFilter();
-  vocalNode.type='peaking';
-  vocalNode.frequency.value=state.vocalFreq;
-  vocalNode.Q.value=state.vocalQ;
-  vocalNode.gain.value=0;
-
-  vocalGain=audioCtx.createGain();
-  vocalGain.gain.value=1;
-
-  deEssNode=audioCtx.createBiquadFilter();
-  deEssNode.type='highshelf';
-  deEssNode.frequency.value=6000;
-  deEssNode.gain.value=0;
-
-  // Voice
-  formant1=audioCtx.createBiquadFilter();
-  formant1.type='peaking'; formant1.Q.value=3;
-  formant1.frequency.value=500; formant1.gain.value=0;
-
-  formant2=audioCtx.createBiquadFilter();
-  formant2.type='peaking'; formant2.Q.value=3;
-  formant2.frequency.value=1500; formant2.gain.value=0;
-
-  robotOsc=audioCtx.createOscillator();
-  robotOsc.type='sawtooth'; robotOsc.frequency.value=50;
-  robotGain=audioCtx.createGain(); robotGain.gain.value=0;
-  robotMix=audioCtx.createGain(); robotMix.gain.value=1;
-  try{robotOsc.start();}catch(e){}
-
-  // Split
-  splitSplitter=audioCtx.createChannelSplitter(2);
-  splitMidGain=audioCtx.createGain();
-  splitSideGainL=audioCtx.createGain();
-  splitSideGainR=audioCtx.createGain();
-  merger=audioCtx.createChannelMerger(2);
-  splitMidGain.gain.value=1;
-  splitSideGainL.gain.value=1;
-  splitSideGainR.gain.value=1;
-
-  // Gains
-  gainNode=audioCtx.createGain();
-  gainRawNode=audioCtx.createGain();
-  boostNode=audioCtx.createGain();
-
-  // Reverb
-  reverbNode=audioCtx.createConvolver();
-  reverbNode.buffer=buildReverbIR(audioCtx,2.0);
-  reverbWet=audioCtx.createGain(); reverbWet.gain.value=0;
-  dryNode=audioCtx.createGain(); dryNode.gain.value=1;
-
-  // Limiter
-  limiterNode=audioCtx.createDynamicsCompressor();
-  limiterNode.threshold.value=-1;
-  limiterNode.knee.value=0;
-  limiterNode.ratio.value=20;
-  limiterNode.attack.value=0.003;
-  limiterNode.release.value=0.1;
-
-  // Soft Clip
-  softClipNode=audioCtx.createWaveShaper();
-  softClipNode.curve=makeSoftClipCurve();
-  softClipNode.oversample='4x';
-
-  // Analyser
-  analyserNode=audioCtx.createAnalyser();
-  analyserNode.fftSize=64;
-
-  // ─── WIRE ───────────────────────────────────────────────────────────
-  let node=srcNode;
-  node.connect(bassNode);   node=bassNode;
-  node.connect(midNode);    node=midNode;
-  node.connect(trebleNode); node=trebleNode;
-  eqNodes.forEach(f=>{node.connect(f);node=f;});
-  node.connect(excNode);    node=excNode;
-  node.connect(satNode);    node=satNode;
-
-  node.connect(vocalNode);   node=vocalNode;
-  node.connect(vocalGain);   node=vocalGain;
-  node.connect(deEssNode);   node=deEssNode;
-
-  node.connect(formant1); node=formant1;
-  node.connect(formant2); node=formant2;
-  node.connect(robotMix);
-  robotOsc.connect(robotGain);
-  robotGain.connect(robotMix.gain);
-  node=robotMix;
-
-  node.connect(gainNode);     node=gainNode;
-  node.connect(gainRawNode);  node=gainRawNode;
-  node.connect(boostNode);    node=boostNode;
-
-  node.connect(splitSplitter);
-  splitSplitter.connect(splitMidGain,0);
-  splitSplitter.connect(splitSideGainL,0);
-  splitSplitter.connect(splitSideGainR,1);
-  splitMidGain.connect(merger,0,0);
-  splitMidGain.connect(merger,0,1);
-  splitSideGainL.connect(merger,0,1);
-  splitSideGainR.connect(merger,0,0);
-
-  merger.connect(dryNode);
-  merger.connect(reverbNode);
-  reverbNode.connect(reverbWet);
-
-  const preOut=audioCtx.createGain();
-  dryNode.connect(preOut);
-  reverbWet.connect(preOut);
-
-  preOut.connect(limiterNode);
-  limiterNode.connect(softClipNode);
-  softClipNode.connect(analyserNode);
-  analyserNode.connect(audioCtx.destination);
-
-  destinationNode=audioCtx.createMediaStreamDestination();
-  analyserNode.connect(destinationNode);
-}
-
-// ═══════════════════════════════════════════════════════════════════════════
-//  APPLY STATE
-// ═══════════════════════════════════════════════════════════════════════════
-function applyState(){
-  if(!audioCtx)return;
-  const t=audioCtx.currentTime;
-
-  gainNode.gain.setTargetAtTime(state.volume,t,0.03);
-  gainRawNode.gain.setTargetAtTime(state.gain,t,0.03);
-  try{boostNode.gain.setValueAtTime(dbToGain(state.boostDB),t);}catch(e){}
-
-  bassNode.frequency.setTargetAtTime(state.bassFreq,t,0.03);
-  bassNode.gain.setTargetAtTime(state.bass,t,0.03);
-  midNode.frequency.setTargetAtTime(state.midFreq,t,0.03);
-  midNode.gain.setTargetAtTime(state.mid,t,0.03);
-  trebleNode.frequency.setTargetAtTime(state.trebleFreq,t,0.03);
-  trebleNode.gain.setTargetAtTime(state.treble,t,0.03);
-  excNode.gain.setTargetAtTime(state.exc,t,0.03);
-  eqNodes.forEach((f,i)=>f.gain.setTargetAtTime(state.eqBands[i]||0,t,0.03));
-
-  satNode.curve=makeSatCurve(state.sat);
-
-  const vPct=state.vocalBoost;
-  const vGain=state.vocalOn?vocalPctToGain(vPct):1;
-  let vFilterDb=0;
-  if(state.vocalOn && vPct>100){
-    vFilterDb=Math.min(20, Math.log10(vPct/100)*10);
-  }
-  vocalNode.frequency.setTargetAtTime(state.vocalFreq,t,0.03);
-  vocalNode.Q.setTargetAtTime(state.vocalQ,t,0.03);
-  vocalNode.gain.setTargetAtTime(vFilterDb,t,0.03);
-  try{vocalGain.gain.setValueAtTime(vGain,t);}catch(e){}
-  deEssNode.gain.setTargetAtTime(-state.deEss,t,0.03);
-
-  const pitchFactor=Math.pow(2,state.pitch/12);
-  if(audioEl)audioEl.playbackRate=state.rate*pitchFactor;
-  formant1.gain.setTargetAtTime(state.formant*1.2,t,0.03);
-  formant2.gain.setTargetAtTime(state.formant*1.0,t,0.03);
-  robotOsc.frequency.setTargetAtTime(50+state.robot*200,t,0.03);
-  robotGain.gain.setTargetAtTime(state.voiceOn?state.robot:0,t,0.03);
-  robotMix.gain.setTargetAtTime(state.voiceOn?(1-state.robot*0.6):1,t,0.03);
-
-  const amt=state.splitAmt/100;
-  if(state.split==='vocal'){
-    splitMidGain.gain.setTargetAtTime(1,t,0.05);
-    splitSideGainL.gain.setTargetAtTime(1-amt,t,0.05);
-    splitSideGainR.gain.setTargetAtTime(1-amt,t,0.05);
-  }else if(state.split==='inst'){
-    splitMidGain.gain.setTargetAtTime(1-amt,t,0.05);
-    splitSideGainL.gain.setTargetAtTime(1,t,0.05);
-    splitSideGainR.gain.setTargetAtTime(1,t,0.05);
-  }else{
-    splitMidGain.gain.setTargetAtTime(1,t,0.05);
-    splitSideGainL.gain.setTargetAtTime(1,t,0.05);
-    splitSideGainR.gain.setTargetAtTime(1,t,0.05);
   }
 
-  reverbWet.gain.setTargetAtTime(state.reverbOn?state.rev/100:0,t,0.05);
-  dryNode.gain.setTargetAtTime(state.reverbOn?(1-state.rev/200):1,t,0.05);
-
-  limiterNode.threshold.setTargetAtTime(state.limiterOn?-1:0,t,0.05);
-
-  if(state.softClipOn){
-    softClipNode.curve=makeSoftClipCurve();
-  }else{
-    const lin=new Float32Array(1024);
-    for(let i=0;i<1024;i++)lin[i]=(i*2)/1024-1;
-    softClipNode.curve=lin;
+  let rawStream;
+  try {
+    rawStream = await _nativeGUM(constraints);
+  } catch (err) {
+    console.error('🦈 Big Shark: getUserMedia gốc lỗi:', err);
+    throw err;
   }
 
-  updateLabels();
-}
+  _rawStream = rawStream;
 
-function updateLabels(){
-  $('vVol').textContent=Math.round(state.volume*100)+'%';
-  $('vBoost').textContent=state.boostDB+' dB';
-  $('vGain').textContent=state.gain.toFixed(1)+'x';
-  $('vBass').textContent=state.bass+' dB';
-  $('vBassF').textContent=state.bassFreq+' Hz';
-  $('vMid').textContent=state.mid+' dB';
-  $('vMidF').textContent=state.midFreq+' Hz';
-  $('vTreble').textContent=state.treble+' dB';
-  $('vTrebleF').textContent=state.trebleFreq+' Hz';
-  $('vSat').textContent=state.sat+'%';
-  $('vExc').textContent=state.exc+' dB';
-  $('vVocalBoost').textContent=state.vocalBoost+'%';
-  $('vVocalFreq').textContent=state.vocalFreq+' Hz';
-  $('vVocalQ').textContent=state.vocalQ.toFixed(1);
-  $('vDeEss').textContent=state.deEss+' dB';
-  $('vPitch').textContent=state.pitch;
-  $('vRate').textContent=state.rate.toFixed(2)+'x';
-  $('vFormant').textContent=state.formant;
-  $('vRobot').textContent=state.robot+'%';
-  $('vSplitAmt').textContent=state.splitAmt+'%';
-  $('vWidth').textContent=state.width+'%';
-  $('vRev').textContent=state.rev+'%';
-}
-
-// ═══════════════════════════════════════════════════════════════════════════
-//  FILE + PLAYBACK
-// ═══════════════════════════════════════════════════════════════════════════
-function fmtTime(s){
-  if(!isFinite(s))return '0:00';
-  s=Math.max(0,Math.floor(s));
-  return Math.floor(s/60)+':'+String(s%60).padStart(2,'0');
-}
-function fmtSize(b){
-  if(b<1024)return b+' B';
-  if(b<1048576)return (b/1024).toFixed(1)+' KB';
-  return (b/1048576).toFixed(2)+' MB';
-}
-
-function loadFile(file){
-  if(!file){
-    toastMsg('❌ Không có file!');
-    return;
+  if (!rawStream.getAudioTracks().length) {
+    return rawStream;
   }
 
-  // Kiểm tra mở rộng — chấp nhận cả khi file.type rỗng
-  const okExt = /\.(mp3|wav|m4a|flac|ogg|opus|aac|webm|wma|aiff?)$/i.test(file.name);
-  const okMime = file.type && file.type.startsWith('audio/');
-  if(!okExt && !okMime){
-    toastMsg('❌ File không phải nhạc!');
-    return;
+  try {
+    const ctx = getAudioContext();
+    if (ctx.state === 'suspended') await ctx.resume();
+
+    const src  = ctx.createMediaStreamSource(rawStream);
+    const dest = ctx.createMediaStreamDestination();
+
+    /* ─── Nodes ─── */
+    const noiseGate = ctx.createDynamicsCompressor();
+    noiseGate.threshold.value = -40.0;
+    noiseGate.ratio.value = 4.0;
+    noiseGate.attack.value = 0.001;
+    noiseGate.release.value = 0.1;
+
+    const lowCut = ctx.createBiquadFilter();
+    lowCut.type = 'highpass';
+    lowCut.frequency.value = 80.0;
+    lowCut.Q.value = 0.7;
+
+    const bassEQ = ctx.createBiquadFilter();
+    bassEQ.type = 'lowshelf';
+    bassEQ.frequency.value = P.bassFreq;
+    bassEQ.gain.value = P.bassGain;
+
+    const midEQ = ctx.createBiquadFilter();
+    midEQ.type = 'peaking';
+    midEQ.frequency.value = P.midFreq;
+    midEQ.Q.value = 0.7;
+    midEQ.gain.value = P.midGain;
+
+    const trebleEQ = ctx.createBiquadFilter();
+    trebleEQ.type = 'highshelf';
+    trebleEQ.frequency.value = P.trebleFreq;
+    trebleEQ.gain.value = P.trebleGain;
+
+    const highCut = ctx.createBiquadFilter();
+    highCut.type = 'lowpass';
+    highCut.frequency.value = 16000;
+
+    const inGain = ctx.createGain();
+    inGain.gain.value = P.inputGain;
+
+    const compressor = ctx.createDynamicsCompressor();
+    compressor.threshold.value = -12.0;
+    compressor.knee.value = 6.0;
+    compressor.ratio.value = 3.0;
+    compressor.attack.value = 0.005;
+    compressor.release.value = 0.08;
+
+    const outGain = ctx.createGain();
+    outGain.gain.value = P.outputGain;
+
+    const dryGain = ctx.createGain();
+    dryGain.gain.value = 1.2;
+
+    const convolver = ctx.createConvolver();
+    convolver.buffer = createReverbBuffer(ctx, P.reverbDuration);
+
+    const reverbFilter = ctx.createBiquadFilter();
+    reverbFilter.type = 'peaking';
+    reverbFilter.frequency.value = 2000;
+    reverbFilter.Q.value = 0.5;
+    reverbFilter.gain.value = -3.0;
+
+    const wetGain = ctx.createGain();
+    wetGain.gain.value = P.reverbSolo;
+
+    const bypassGain = ctx.createGain();
+    bypassGain.gain.value = 1;
+
+    const analyser = ctx.createAnalyser();
+    analyser.fftSize = 256;
+
+    /* ─── WIRING ─── */
+    // Nhánh bypass (mặc định mở để khi chưa bật thì mic nghe y nguyên)
+    src.connect(bypassGain);
+    bypassGain.connect(dest);
+
+    // Nhánh xử lý
+    src.connect(noiseGate);
+    noiseGate.connect(lowCut);
+    lowCut.connect(bassEQ);
+    bassEQ.connect(midEQ);
+    midEQ.connect(trebleEQ);
+    trebleEQ.connect(highCut);
+    highCut.connect(inGain);
+    inGain.connect(compressor);
+    compressor.connect(outGain);
+
+    outGain.connect(dryGain);
+    dryGain.connect(dest);
+
+    outGain.connect(reverbFilter);
+    reverbFilter.connect(convolver);
+    convolver.connect(wetGain);
+    wetGain.connect(dest);
+
+    outGain.connect(analyser);
+
+    _nodes = {
+      src, dest, noiseGate, lowCut, bassEQ, midEQ, trebleEQ, highCut,
+      inGain, compressor, outGain, dryGain, convolver, reverbFilter,
+      wetGain, bypassGain, analyser
+    };
+    window.__bmNodes = _nodes;
+
+    applyActiveState();
+
+    UI.badge(isActive ? '🔴 BIG SHARK ACTIVE' : '🔵 BIG SHARK STANDBY',
+             isActive ? '#e74c3c' : '#2196F3');
+
+    startMeter();
+
+    return dest.stream;
+
+  } catch (err) {
+    console.warn('🦈 Big Shark: Audio graph error, fallback về raw:', err);
+    return rawStream;
   }
+};
 
-  initGraph();
-
-  if(audioCtx.state === 'suspended'){
-    audioCtx.resume().catch(err => console.warn('resume fail:', err));
-  }
-
-  // Giải phóng URL cũ
-  if(currentObjectURL){
-    URL.revokeObjectURL(currentObjectURL);
-    currentObjectURL = null;
-  }
-
-  currentObjectURL = URL.createObjectURL(file);
-  audioEl.src = currentObjectURL;
-  audioEl.load();
-  currentFileName = file.name;
-
-  trackInfo.style.display = 'flex';
-  progressWrap.style.display = 'flex';
-  trackName.textContent = file.name;
-  trackMeta.textContent = fmtSize(file.size) + ' · ' + (file.type || 'audio/' + (file.name.split('.').pop()||'?'));
-  btnPlay.disabled = btnBack.disabled = btnFwd.disabled = btnDl.disabled = false;
-  const exp = $('btnExportAudio');
-  if(exp) exp.disabled = false;
-
-  progressFill.style.width = '0%';
-  timeNow.textContent = '0:00';
-  timeEnd.textContent = '0:00';
-
-  toastMsg('📂 Đang tải: ' + file.name);
-}
-
-drop.addEventListener('click',()=>fileInput.click());
-fileInput.addEventListener('change', e => {
-  const f = e.target.files && e.target.files[0];
-  if(f) loadFile(f);
-  e.target.value = '';
-});
-
-['dragenter','dragover'].forEach(ev => drop.addEventListener(ev, e => {
-  e.preventDefault(); e.stopPropagation();
-  drop.classList.add('drag');
-}));
-['dragleave','drop'].forEach(ev => drop.addEventListener(ev, e => {
-  e.preventDefault(); e.stopPropagation();
-  drop.classList.remove('drag');
-}));
-
-drop.addEventListener('drop', e => {
-  const dt = e.dataTransfer;
-  if(!dt) return;
-  let f = dt.files && dt.files[0];
-  if(!f && dt.items){
-    for(const it of dt.items){
-      if(it.kind === 'file'){ f = it.getAsFile(); break; }
-    }
-  }
-  if(f) loadFile(f);
-  else toastMsg('❌ Không tìm thấy file trong drop');
-});
-
-// Ngăn browser mở file khi drop ra ngoài
-['dragover','drop'].forEach(ev =>
-  window.addEventListener(ev, e => e.preventDefault())
-);
-
-function togglePlay(){
-  if(!audioEl || !audioEl.src){
-    toastMsg('⚠️ Chưa chọn file nhạc!');
-    return;
-  }
-  if(audioCtx && audioCtx.state === 'suspended'){
-    audioCtx.resume();
-  }
-  if(audioEl.paused){
-    const p = audioEl.play();
-    if(p && p.catch){
-      p.catch(err => {
-        console.error('play() failed:', err);
-        toastMsg('❌ Không phát được: ' + err.message);
-        btnPlay.textContent = '▶';
-      });
-    }
+/* ─────────── APPLY ACTIVE ─────────── */
+function applyActiveState() {
+  if (!_nodes.bypassGain || !_ctx) return;
+  const t = _ctx.currentTime;
+  if (isActive) {
+    _nodes.bypassGain.gain.setTargetAtTime(0, t, 0.03);
+    _nodes.dryGain.gain.setTargetAtTime(1.2, t, 0.03);
+    _nodes.wetGain.gain.setTargetAtTime(P.reverbSolo, t, 0.03);
   } else {
-    audioEl.pause();
+    _nodes.bypassGain.gain.setTargetAtTime(1, t, 0.03);
+    _nodes.dryGain.gain.setTargetAtTime(0, t, 0.03);
+    _nodes.wetGain.gain.setTargetAtTime(0, t, 0.03);
   }
 }
 
-btnPlay.addEventListener('click',togglePlay);
-btnBack.addEventListener('click',()=>{ if(audioEl) audioEl.currentTime=Math.max(0,audioEl.currentTime-5); });
-btnFwd.addEventListener('click',()=>{ if(audioEl) audioEl.currentTime=Math.min(audioEl.duration||0,audioEl.currentTime+5); });
-btnLoop.addEventListener('click',()=>{
-  state.loop=!state.loop;
-  btnLoop.style.background=state.loop?'linear-gradient(135deg,#ff2d55,#7c4dff)':'';
-  toastMsg(state.loop?'🔁 Bật lặp':'🔁 Tắt lặp');
-});
-btnDl.addEventListener('click',()=>{
-  if(!audioEl||!audioEl.src)return;
-  const a=document.createElement('a');
-  a.href=audioEl.src;
-  a.download=currentFileName||'music';
-  document.body.appendChild(a);a.click();
-  setTimeout(()=>a.remove(),100);
-});
-progressBar.addEventListener('click',e=>{
-  if(!audioEl||!audioEl.duration||!isFinite(audioEl.duration))return;
-  const rect=progressBar.getBoundingClientRect();
-  audioEl.currentTime=((e.clientX-rect.left)/rect.width)*audioEl.duration;
-});
+/* ─────────── METER ─────────── */
+function startMeter() {
+  cancelAnimationFrame(_meterRAF);
+  const canvas = document.getElementById('bm-meter');
+  if (!canvas || !_nodes.analyser) return;
+  const c2d = canvas.getContext('2d');
+  const buf = new Uint8Array(_nodes.analyser.frequencyBinCount);
 
-// ═══════════════════════════════════════════════════════════════════════════
-//  BIND SLIDERS
-// ═══════════════════════════════════════════════════════════════════════════
-function bind(id,key,transform){
-  const el=$(id);
-  el.addEventListener('input',()=>{
-    let v=parseFloat(el.value);
-    if(transform)v=transform(v);
-    state[key]=v;
-    applyState();
-  });
-}
+  function draw() {
+    _meterRAF = requestAnimationFrame(draw);
+    if (!_nodes.analyser) return;
+    _nodes.analyser.getByteFrequencyData(buf);
+    let sum = 0;
+    for (let i = 0; i < buf.length; i++) sum += buf[i];
+    const level = Math.min(1, (sum / buf.length) / 100);
 
-bind('sVol','volume',v=>v/100);
-bind('sBoost','boostDB');
-bind('sGain','gain');
-bind('sBass','bass');
-bind('sBassF','bassFreq');
-bind('sMid','mid');
-bind('sMidF','midFreq');
-bind('sTreble','treble');
-bind('sTrebleF','trebleFreq');
-bind('sSat','sat');
-bind('sExc','exc');
-bind('sVocalBoost','vocalBoost');
-bind('sVocalFreq','vocalFreq');
-bind('sVocalQ','vocalQ');
-bind('sDeEss','deEss');
-bind('sPitch','pitch');
-bind('sRate','rate');
-bind('sFormant','formant');
-bind('sRobot','robot');
-bind('sSplitAmt','splitAmt');
-bind('sWidth','width');
-bind('sRev','rev');
+    c2d.fillStyle = '#e5e7eb';
+    c2d.fillRect(0, 0, canvas.width, canvas.height);
 
-// EQ bands 10
-const eqBandsEl=$('eqBands');
-EQ_LABELS.forEach((lb,i)=>{
-  const row=document.createElement('div');
-  row.className='slider-row';
-  row.innerHTML=`<div class="top"><b>${lb} Hz</b><span id="vEq${i}">0</span></div>
-    <input type="range" id="sEq${i}" min="-20" max="20" step="0.5" value="0">`;
-  eqBandsEl.appendChild(row);
-});
-for(let i=0;i<10;i++){
-  const el=$('sEq'+i), lbl=$('vEq'+i);
-  el.addEventListener('input',()=>{
-    state.eqBands[i]=parseFloat(el.value);
-    lbl.textContent=state.eqBands[i];
-    applyState();
-  });
-}
-
-$('vocalOn').addEventListener('change',e=>{state.vocalOn=e.target.checked;applyState();});
-$('voiceOn').addEventListener('change',e=>{state.voiceOn=e.target.checked;applyState();});
-$('reverbOn').addEventListener('change',e=>{state.reverbOn=e.target.checked;applyState();});
-$('limiterOn').addEventListener('change',e=>{state.limiterOn=e.target.checked;applyState();});
-$('softClipOn').addEventListener('change',e=>{state.softClipOn=e.target.checked;applyState();});
-
-// ═══════════════════════════════════════════════════════════════════════════
-//  PRESETS
-// ═══════════════════════════════════════════════════════════════════════════
-const PRESETS={
-  flat:  {volume:1.0,boostDB:0,gain:1,bass:0,mid:0,treble:0,sat:0,exc:0},
-  live:  {volume:1.1,boostDB:3000,gain:1.5,bass:5,mid:2,treble:3,sat:10,exc:3},
-  bass:  {volume:1.1,boostDB:8000,gain:2,bass:20,mid:-2,treble:2,sat:15,exc:2},
-  club:  {volume:1.3,boostDB:15000,gain:3,bass:15,mid:0,treble:6,sat:20,exc:5},
-  vocal: {volume:1.2,boostDB:6000,gain:2,bass:-3,mid:3,treble:5,sat:8,exc:4},
-  max:   {volume:1.6,boostDB:40000,gain:5,bass:30,mid:0,treble:10,sat:35,exc:8}
-};
-
-document.querySelectorAll('.preset[data-preset]').forEach(btn=>{
-  btn.addEventListener('click',()=>{
-    const p=PRESETS[btn.dataset.preset];
-    if(!p)return;
-    Object.assign(state,p);
-    state.preset=btn.dataset.preset;
-    document.querySelectorAll('.preset[data-preset]').forEach(b=>
-      b.classList.toggle('active',b.dataset.preset===state.preset));
-    $('sVol').value=Math.round(state.volume*100);
-    $('sBoost').value=state.boostDB;
-    $('sGain').value=state.gain;
-    $('sBass').value=state.bass;
-    $('sMid').value=state.mid;
-    $('sTreble').value=state.treble;
-    $('sSat').value=state.sat;
-    $('sExc').value=state.exc;
-    applyState();
-    toastMsg('🎛️ Preset: '+btn.textContent.trim());
-  });
-});
-
-const VOCAL_PRESETS = {
-  off:    { vocalOn:false, vocalBoost:100,   vocalFreq:1500, vocalQ:1.0, deEss:0 },
-  soft:   { vocalOn:true,  vocalBoost:200,   vocalFreq:1500, vocalQ:1.0, deEss:2 },
-  strong: { vocalOn:true,  vocalBoost:1000,  vocalFreq:1800, vocalQ:1.2, deEss:4 },
-  max:    { vocalOn:true,  vocalBoost:3000,  vocalFreq:2000, vocalQ:1.5, deEss:6 },
-  insane: { vocalOn:true,  vocalBoost:6000,  vocalFreq:2200, vocalQ:2.0, deEss:10 },
-  nuke:   { vocalOn:true,  vocalBoost:10000, vocalFreq:2500, vocalQ:2.5, deEss:15 },
-};
-
-document.querySelectorAll('.preset[data-vocal]').forEach(btn=>{
-  btn.addEventListener('click',()=>{
-    const p=VOCAL_PRESETS[btn.dataset.vocal];
-    if(!p)return;
-    Object.assign(state,p);
-    state.vocalPreset=btn.dataset.vocal;
-    $('vocalOn').checked=state.vocalOn;
-    $('sVocalBoost').value=state.vocalBoost;
-    $('sVocalFreq').value=state.vocalFreq;
-    $('sVocalQ').value=state.vocalQ;
-    $('sDeEss').value=state.deEss;
-    document.querySelectorAll('.preset[data-vocal]').forEach(b=>
-      b.classList.toggle('active',b.dataset.vocal===state.vocalPreset));
-    applyState();
-    toastMsg('🎤 Vocal: '+btn.textContent.trim());
-  });
-});
-
-const EQ_PRESETS={
-  flat:[0,0,0,0,0,0,0,0,0,0],
-  pop:[1,2,3,2,0,-1,1,2,3,2],
-  rock:[4,3,2,0,-1,-2,0,2,3,4],
-  jazz:[3,2,1,1,0,0,1,2,2,3],
-  classical:[2,1,0,0,0,0,-1,-1,1,2],
-  custom:null
-};
-document.querySelectorAll('.preset[data-eq]').forEach(btn=>{
-  btn.addEventListener('click',()=>{
-    const key=btn.dataset.eq, arr=EQ_PRESETS[key];
-    if(!arr)return;
-    state.eqBands=arr.slice();
-    state.eqPreset=key;
-    for(let i=0;i<10;i++){
-      $('sEq'+i).value=arr[i];
-      $('vEq'+i).textContent=arr[i];
-    }
-    document.querySelectorAll('.preset[data-eq]').forEach(b=>
-      b.classList.toggle('active',b.dataset.eq===key));
-    applyState();
-    toastMsg('🎚️ EQ: '+btn.textContent.trim());
-  });
-});
-
-const VOICE_PRESETS={
-  none:{pitch:0,rate:1.0,formant:0,robot:0},
-  baby:{pitch:8,rate:1.15,formant:8,robot:0},
-  child:{pitch:5,rate:1.08,formant:5,robot:0},
-  female:{pitch:3,rate:1.0,formant:4,robot:0},
-  male:{pitch:-3,rate:1.0,formant:-3,robot:0},
-  deep:{pitch:-6,rate:0.95,formant:-6,robot:0},
-  demon:{pitch:-8,rate:0.9,formant:-8,robot:0.3},
-  robot:{pitch:0,rate:1.0,formant:0,robot:0.85},
-  alien:{pitch:5,rate:0.9,formant:3,robot:0.5},
-  chipmunk:{pitch:12,rate:1.4,formant:6,robot:0}
-};
-document.querySelectorAll('.preset[data-voice]').forEach(btn=>{
-  btn.addEventListener('click',()=>{
-    const p=VOICE_PRESETS[btn.dataset.voice];
-    if(!p)return;
-    Object.assign(state,p);
-    state.voicePreset=btn.dataset.voice;
-    state.voiceOn=true;
-    $('voiceOn').checked=true;
-    $('sPitch').value=p.pitch;
-    $('sRate').value=p.rate;
-    $('sFormant').value=p.formant;
-    $('sRobot').value=Math.round(p.robot*100);
-    document.querySelectorAll('.preset[data-voice]').forEach(b=>
-      b.classList.toggle('active',b.dataset.voice===state.voicePreset));
-    applyState();
-    toastMsg('🗣️ Giọng: '+btn.textContent.trim());
-  });
-});
-
-document.querySelectorAll('.preset[data-split]').forEach(btn=>{
-  btn.addEventListener('click',()=>{
-    state.split=btn.dataset.split;
-    document.querySelectorAll('.preset[data-split]').forEach(b=>
-      b.classList.toggle('active',b.dataset.split===state.split));
-    applyState();
-    const labels={off:'Tắt',vocal:'Giọng hát',inst:'Nhạc nền'};
-    toastMsg('✂️ '+labels[state.split]);
-  });
-});
-
-$('btnReset').addEventListener('click',()=>{
-  Object.assign(state,{
-    loop:false,volume:1.0,boostDB:0,gain:1,
-    bass:0,bassFreq:200,mid:0,midFreq:1000,treble:0,trebleFreq:3000,
-    sat:0,exc:0,eqBands:[0,0,0,0,0,0,0,0,0,0],
-    preset:'flat',eqPreset:'flat',
-    vocalOn:false,vocalBoost:100,vocalFreq:1500,vocalQ:1.0,deEss:0,vocalPreset:'off',
-    voiceOn:false,voicePreset:'none',pitch:0,rate:1.0,formant:0,robot:0,
-    split:'off',splitAmt:100,width:100,
-    reverbOn:false,rev:0,limiterOn:true,softClipOn:true
-  });
-  $('sVol').value=100;$('sBoost').value=0;$('sGain').value=1;
-  $('sBass').value=0;$('sBassF').value=200;
-  $('sMid').value=0;$('sMidF').value=1000;
-  $('sTreble').value=0;$('sTrebleF').value=3000;
-  $('sSat').value=0;$('sExc').value=0;
-  $('sVocalBoost').value=100;$('sVocalFreq').value=1500;
-  $('sVocalQ').value=1;$('sDeEss').value=0;
-  $('sPitch').value=0;$('sRate').value=1;$('sFormant').value=0;$('sRobot').value=0;
-  $('sSplitAmt').value=100;$('sWidth').value=100;$('sRev').value=0;
-  $('vocalOn').checked=false;$('voiceOn').checked=false;
-  $('reverbOn').checked=false;$('limiterOn').checked=true;$('softClipOn').checked=true;
-  for(let i=0;i<10;i++){$('sEq'+i).value=0;$('vEq'+i).textContent=0;}
-  document.querySelectorAll('.preset[data-preset]').forEach(b=>b.classList.toggle('active',b.dataset.preset==='flat'));
-  document.querySelectorAll('.preset[data-eq]').forEach(b=>b.classList.toggle('active',b.dataset.eq==='flat'));
-  document.querySelectorAll('.preset[data-voice]').forEach(b=>b.classList.toggle('active',b.dataset.voice==='none'));
-  document.querySelectorAll('.preset[data-split]').forEach(b=>b.classList.toggle('active',b.dataset.split==='off'));
-  document.querySelectorAll('.preset[data-vocal]').forEach(b=>b.classList.toggle('active',b.dataset.vocal==='off'));
-  btnLoop.style.background='';
-  applyState();
-  toastMsg('🔄 Đã reset');
-});
-
-// ═══════════════════════════════════════════════════════════════════════════
-//  METER
-// ═══════════════════════════════════════════════════════════════════════════
-const METER_BARS=24, meter=$('meter');
-for(let i=0;i<METER_BARS;i++){
-  const b=document.createElement('div');
-  b.className='bar';
-  meter.appendChild(b);
-}
-const barEls=Array.from(meter.children);
-
-function renderMeter(){
-  if(analyserNode){
-    const data=new Uint8Array(analyserNode.frequencyBinCount);
-    analyserNode.getByteFrequencyData(data);
-    const step=Math.max(1,Math.floor(data.length/METER_BARS));
-    for(let i=0;i<METER_BARS;i++){
-      let s=0;
-      for(let j=0;j<step;j++)s+=data[i*step+j]||0;
-      const v=s/step/255;
-      barEls[i].style.height=Math.max(8,v*100)+'%';
-    }
-  } else {
-    barEls.forEach(b => b.style.height = '10%');
+    const grad = c2d.createLinearGradient(0, 0, canvas.width, 0);
+    grad.addColorStop(0,   '#22c55e');
+    grad.addColorStop(0.7, '#eab308');
+    grad.addColorStop(1,   '#ef4444');
+    c2d.fillStyle = grad;
+    c2d.fillRect(0, 0, canvas.width * level, canvas.height);
   }
-  requestAnimationFrame(renderMeter);
+  draw();
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
-//  EXPORT AUDIO
-// ═══════════════════════════════════════════════════════════════════════════
-async function recordRealtime(durationSec, onProgress){
-  const stream=destinationNode.stream;
-  const recorder=new MediaRecorder(stream,{mimeType:'audio/webm'});
-  const chunks=[];
-  recorder.ondataavailable=e=>{if(e.data.size)chunks.push(e.data);};
-  return new Promise(resolve=>{
-    recorder.onstop=()=>resolve(new Blob(chunks,{type:'audio/webm'}));
-    recorder.start();
-    const start=Date.now();
-    const tick=setInterval(()=>{
-      const elapsed=(Date.now()-start)/1000;
-      if(onProgress)onProgress(elapsed/durationSec);
-      if(elapsed>=durationSec){
-        clearInterval(tick);
-        recorder.stop();
+/* ─────────── UI ─────────── */
+const UI = {
+  badge(txt, col) {
+    const b = document.getElementById('bm-st');
+    if (b) { b.innerText = txt; b.style.color = col; }
+  },
+
+  init() {
+    const toggleBtn = document.createElement('button');
+    toggleBtn.id = 'bm-toggle-btn';
+    toggleBtn.innerText = '🦈';
+    toggleBtn.title = 'Bật/Tắt Menu Big Shark';
+
+    const el = document.createElement('div');
+    el.id = 'bm-ui';
+    el.innerHTML = `
+      <div class="bm-head">
+        <span class="bm-brand">🦈 BIG SHARK <small>v2</small></span>
+        <span id="bm-st">STANDBY</span>
+        <button class="bm-min" id="bm-min" title="Thu gọn">–</button>
+      </div>
+
+      <button id="bm-act">⚡ KÍCH HOẠT BIG SHARK</button>
+
+      <div class="bm-presets">
+        <button data-preset="live">🎤 Live</button>
+        <button data-preset="podcast">🎙️ Podcast</button>
+        <button data-preset="karaoke">🎶 Karaoke</button>
+        <button data-preset="bass">🔊 Bass</button>
+        <button data-preset="max">💥 Max</button>
+      </div>
+
+      <div class="bm-body" id="bm-body">
+        <div class="bm-panel">
+          <div class="bm-label">🎤 GAIN MIC <span class="bm-val" id="bm-v-ingain">${P.inputGain}</span></div>
+          <input type="range" id="bm-ingain" min="1" max="50" step="1" value="${P.inputGain}">
+
+          <div class="bm-label">🔊 BASS <span class="bm-val" id="bm-v-bass">${P.bassGain}</span></div>
+          <input type="range" id="bm-bass" min="0" max="20" step="0.5" value="${P.bassGain}">
+
+          <div class="bm-label">🎵 MID <span class="bm-val" id="bm-v-mid">${P.midGain}</span></div>
+          <input type="range" id="bm-mid" min="0" max="12" step="0.5" value="${P.midGain}">
+
+          <div class="bm-label">✨ TREBLE <span class="bm-val" id="bm-v-treble">${P.trebleGain}</span></div>
+          <input type="range" id="bm-treble" min="0" max="10" step="0.5" value="${P.trebleGain}">
+
+          <div class="bm-label">🌊 REVERB <span class="bm-val" id="bm-v-rev">${Math.round(P.reverbSolo*100)}%</span></div>
+          <input type="range" id="bm-rev" min="0" max="200" value="${Math.round(P.reverbSolo*100)}">
+
+          <div class="bm-label">⏱️ ĐỘ DÀI VANG <span class="bm-val" id="bm-v-dur">${P.reverbDuration}s</span></div>
+          <input type="range" id="bm-dur" min="0.5" max="5" step="0.5" value="${P.reverbDuration}">
+        </div>
+
+        <div class="bm-label" style="margin-top:12px;">📊 TÍN HIỆU MIC</div>
+        <canvas id="bm-meter" width="248" height="10" class="bm-meter"></canvas>
+
+        <div class="bm-foot">
+          🎧 VST 2 TAI · LỌC TẠP ÂM · MIC RÕ TO
+        </div>
+      </div>
+    `;
+
+    const css = `
+      #bm-toggle-btn {
+        position: fixed; top: 20px; right: 20px; width: 46px; height: 46px;
+        background: #ffffff; border: 2px solid #1a237e; border-radius: 50%;
+        color: #1a237e; font-size: 22px; cursor: pointer; z-index: 2147483000;
+        box-shadow: 0 0 20px rgba(26,35,126,0.3); display: flex;
+        align-items: center; justify-content: center;
+        transition: all 0.3s ease; padding: 0; line-height: 1;
       }
-    },100);
-  });
+      #bm-toggle-btn:hover { transform: scale(1.1); box-shadow: 0 0 30px rgba(26,35,126,0.5); }
+      #bm-toggle-btn.on { background: linear-gradient(135deg, #00b09b, #2ecc71); border-color: #2ecc71; color: #fff; }
+
+      #bm-ui {
+        position: fixed; top: 76px; right: 20px; width: 296px; background: #ffffff;
+        border: 2px solid #e0e0e0; padding: 14px; border-radius: 14px;
+        color: #1a1a1a; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        z-index: 2147483000; box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        transition: all 0.3s ease;
+      }
+      #bm-ui.bm-hidden { display: none; }
+
+      .bm-head {
+        display: flex; align-items: center; justify-content: space-between;
+        border-bottom: 2px solid #f0f0f0; padding-bottom: 10px; margin-bottom: 12px;
+      }
+      .bm-brand { font-weight: 900; font-size: 14px; letter-spacing: 0.5px; }
+      .bm-brand small { font-size: 9px; background: #1a237e; color: #fff;
+        padding: 2px 5px; border-radius: 4px; vertical-align: middle; }
+      #bm-st { font-size: 9px; font-weight: bold; color: #2196F3; }
+      .bm-min {
+        background: #f0f0f0; border: none; width: 22px; height: 22px;
+        border-radius: 6px; cursor: pointer; font-weight: 900; color: #666;
+        line-height: 1; padding: 0;
+      }
+      .bm-min:hover { background: #e0e0e0; }
+
+      #bm-act {
+        width: 100%; padding: 12px; background: linear-gradient(135deg, #1a237e, #0d47a1);
+        color: #fff; font-weight: bold; font-size: 12px; border: none;
+        border-radius: 8px; cursor: pointer; margin-bottom: 12px;
+        box-shadow: 0 4px 15px rgba(13,71,161,0.3); transition: all 0.3s ease;
+      }
+      #bm-act.active {
+        background: linear-gradient(135deg, #00b09b, #2ecc71);
+        box-shadow: 0 4px 15px rgba(46, 204, 113, 0.4);
+      }
+
+      .bm-presets {
+        display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px;
+        margin-bottom: 12px;
+      }
+      .bm-presets button {
+        padding: 7px 4px; border-radius: 8px; border: 1px solid #e0e0e0;
+        background: #fafafa; font-size: 10px; font-weight: 700; cursor: pointer;
+        color: #333; transition: all 0.15s;
+      }
+      .bm-presets button:hover { background: #1a237e; color: #fff; border-color: #1a237e; }
+      .bm-presets button.active { background: #1a237e; color: #fff; border-color: #1a237e; }
+
+      .bm-panel { background: #f8f9fa; padding: 10px 12px; border-radius: 8px; }
+
+      .bm-label {
+        font-size: 10px; font-weight: 700; color: #555; margin-top: 8px;
+        margin-bottom: 4px; letter-spacing: 0.3px;
+        display: flex; justify-content: space-between;
+      }
+      .bm-label:first-child { margin-top: 0; }
+      .bm-val { color: #1a237e; font-weight: 900; }
+
+      #bm-ui input[type=range] {
+        -webkit-appearance: none; appearance: none;
+        width: 100%; height: 5px; background: #d8dce1; border-radius: 3px;
+        cursor: pointer; outline: none; margin-bottom: 2px;
+      }
+      #bm-ui input[type=range]::-webkit-slider-thumb {
+        -webkit-appearance: none; appearance: none; width: 15px; height: 15px;
+        background: #1a237e; border-radius: 50%; cursor: pointer;
+        box-shadow: 0 2px 6px rgba(26,35,126,0.35);
+      }
+      #bm-ui input[type=range]::-moz-range-thumb {
+        width: 15px; height: 15px; background: #1a237e; border-radius: 50%;
+        cursor: pointer; border: none; box-shadow: 0 2px 6px rgba(26,35,126,0.35);
+      }
+
+      .bm-meter { width: 100%; height: 10px; border-radius: 4px; display: block; }
+      .bm-foot {
+        font-size: 9px; color: #888; text-align: center;
+        border-top: 1px solid #eee; padding-top: 10px; margin-top: 12px;
+        letter-spacing: 0.3px;
+      }
+    `;
+    const style = document.createElement('style');
+    style.textContent = css;
+    document.head.appendChild(style);
+    document.body.appendChild(toggleBtn);
+    document.body.appendChild(el);
+
+    /* Toggle menu */
+    toggleBtn.onclick = () => el.classList.toggle('bm-hidden');
+
+    /* Thu gọn */
+    document.getElementById('bm-min').onclick = () => {
+      const body = document.getElementById('bm-body');
+      const presets = el.querySelector('.bm-presets');
+      const btn = document.getElementById('bm-min');
+      const hidden = body.style.display === 'none';
+      body.style.display = hidden ? '' : 'none';
+      presets.style.display = hidden ? '' : 'none';
+      btn.innerText = hidden ? '–' : '+';
+    };
+
+    /* Nút kích hoạt */
+    document.getElementById('bm-act').onclick = async () => {
+      const ctx = getAudioContext();
+      if (ctx.state === 'suspended') await ctx.resume();
+
+      isActive = !isActive;
+      const btn = document.getElementById('bm-act');
+
+      if (isActive) {
+        btn.innerText = '✅ ĐANG BẬT (BẤM ĐỂ TẮT)';
+        btn.classList.add('active');
+        toggleBtn.classList.add('on');
+        applyActiveState();
+        UI.badge('🔴 BIG SHARK ACTIVE', '#e74c3c');
+      } else {
+        btn.innerText = '⚡ KÍCH HOẠT BIG SHARK';
+        btn.classList.remove('active');
+        toggleBtn.classList.remove('on');
+        applyActiveState();
+        UI.badge('🔵 BIG SHARK STANDBY', '#2196F3');
+      }
+    };
+
+    /* Bind sliders */
+    function bindSlider(id, valId, key, transform, format) {
+      const input = document.getElementById(id);
+      const val = document.getElementById(valId);
+      if (!input) return;
+      input.oninput = (e) => {
+        const v = parseFloat(e.target.value);
+        const real = transform ? transform(v) : v;
+        P[key] = real;
+        if (val) val.textContent = format ? format(real) : real;
+        saveSettings();
+
+        const nodeMap = {
+          inputGain:  ['inGain',    'gain'],
+          bassGain:   ['bassEQ',    'gain'],
+          midGain:    ['midEQ',     'gain'],
+          trebleGain: ['trebleEQ',  'gain'],
+          reverbSolo: ['wetGain',   'gain']
+        };
+        const m = nodeMap[key];
+        if (m && _nodes[m[0]] && isActive && _ctx) {
+          _nodes[m[text0]][m[1]].setTargetAtTime(real, _ctx.currentTime, 0.03);
+        }
+      };
+    }
+
+    bindSlider('bmContent-ingain', 'bm-v-ingain', 'inputGain');
+    bindSlider('bm-bass',   'bm-v-bass', =    'bassGain');
+    bindSlider('bm-mid',    'bm-v-mid',     'midGain');
+    P bindSlider('bm-treble', 'bm-v-treble',  'trebleGain');
+    bindSlider('bm-rev',.t    'bm-v-rev',     'reverbSolo', v => v / 100, v => Math.round(v * re100) + '%');
+
+    /* Slider độ dài vang — rebuild convolver */
+    const durInput = document.getElementById('bm-dur');
+    durInput.oninput = (e) => {
+      P.reverbDuration = parseFloat(e.target.value);
+      document.getElementById('bm-v-dur').textContent = P.reverbDuration + 's';
+      saveSettings();
+      if (_nodes.convolver && _ctx) {
+        _nodes.convolver.buffer = createReverbBuffer(_ctx, P.reverbDuration);
+      }
+    };
+
+    /* Preset buttons */
+    el.querySelectorAll('.bm-presets button').forEach(btn => {
+      btn.onclick = () => {
+        const key = btn.dataset.preset;
+        const preset = PRESETS[key];
+        if (!preset) return;
+
+        Object.assign(P, preset);
+        saveSettings();
+
+        document.getElementById('bm-ingain').value = P.inputGain;
+        document.getElementById('bm-v-ingain').textContent = P.inputGain;
+        document.getElementById('bm-bass').value = P.bassGain;
+        document.getElementById('bm-v-bass').textContent = P.bassGain;
+        document.getElementById('bm-mid').value = P.midGain;
+        document.getElementById('bm-v-mid').textContent = P.midGain;
+        document.getElementById('bm-treble').value = P.trebleGain;
+        document.getElementById('bm-v-treble').bleGain;
+        document.getElementById('bm-rev').value = Math.round(P.reverbSolo * 100);
+        document.getElementById('bm-v-rev').textContent = Math.round(P.reverbSolo * 100) + '%';
+        document.getElementById('bm-dur').value = P.reverbDuration;
+        document.getElementById('bm-v-dur').textContent = P.reverbDuration + 's';
+
+        el.querySelectorAll('.bm-presets button').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+
+        // Áp dụng vào nodes
+        if (_nodes.inGain) _nodes.inGain.gain.value = P.inputGain;
+        if (_nodes.bassEQ) _nodes.bassEQ.gain.value = P.bassGain;
+        if (_nodes.midEQ) _nodes.midEQ.gain.value = P.midGain;
+        if (_nodes.trebleEQ) _nodes.trebleEQ.gain.value = P.trebleGain;
+        if (_nodes.wetGain && isActive) _nodes.wetGain.gain.value = P.reverbSolo;
+        if (_nodes.convolver && _ctx) {
+          _nodes.convolver.buffer = createReverbBuffer(_ctx, P.reverbDuration);
+        }
+      };
+    });
+  }
+};
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', () => UI.init());
+} else {
+  UI.init();
 }
-
-$('btnExportAudio').addEventListener('click',async()=>{
-  if(!audioEl||!audioEl.src)return;
-  if(audioCtx.state==='suspended')audioCtx.resume();
-
-  const wasPlaying=!audioEl.paused;
-  if(!wasPlaying)audioEl.play();
-
-  toastMsg('🎙️ Đang ghi... (vui lòng đợi)');
-  const dur=audioEl.duration||30;
-  audioEl.currentTime=0;
-
-  const blob=await recordRealtime(dur,(p)=>{
-    if(Math.floor(p*100)%10===0)toastMsg(`🎙️ Đang ghi... ${Math.round(p*100)}%`);
-  });
-
-  audioEl.pause();
-  const url=URL.createObjectURL(blob);
-  const a=document.createElement('a');
-  a.href=url;
-  a.download='boosted_'+(currentFileName||'audio')+'.webm';
-  document.body.appendChild(a);a.click();
-  setTimeout(()=>{a.remove();URL.revokeObjectURL(url);},200);
-  toastMsg('✅ Đã xuất file!');
-});
-
-// ═══════════════════════════════════════════════════════════════════════════
-//  INIT
-// ═══════════════════════════════════════════════════════════════════════════
-// KHÔNG gọi initGraph() ở đây — chỉ gọi khi user chọn file
-// (tránh AudioContext bị suspended do không có user gesture)
-applyState();
-renderMeter();
 
 })();
 </script>
+
 </body>
 </html>
