@@ -7,41 +7,67 @@
 <style>
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 body{margin:0;background:#0b070b;color:#fff;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;overscroll-behavior:none}
-#app{position:fixed;top:70px;left:24px;width:min(300px,calc(100vw - 24px));background:#1a0f1a;border:2px solid #ff69b4;border-radius:14px;box-shadow:0 0 22px #ff69b455;z-index:99999;user-select:none;touch-action:none}
-#head{padding:12px;background:#2a152a;border-bottom:1px solid #ff69b4;display:flex;justify-content:space-between;align-items:center;cursor:move;border-radius:12px 12px 0 0;touch-action:none}
-.title{color:#ff69b4;font-weight:800;font-size:13px}.status{font-size:11px;color:#aaa;text-align:right;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#app{position:fixed;top:70px;left:24px;width:min(300px,calc(100vw - 24px));background:#1a0f1a;border:2px solid #ff69b4;border-radius:14px;box-shadow:0 0 22px #ff69b455;z-index:99999;user-select:none;touch-action:none;transition:border-color .25s,box-shadow .25s}
+#app.nuke{border-color:#ff2d2d;box-shadow:0 0 32px #ff2d2d99}
+#head{padding:12px;background:#2a152a;border-bottom:1px solid #ff69b4;display:flex;justify-content:space-between;align-items:center;cursor:move;border-radius:12px 12px 0 0;touch-action:none;transition:border-color .25s}
+#app.nuke #head{border-bottom-color:#ff2d2d}
+.title{color:#ff69b4;font-weight:800;font-size:13px;transition:color .25s}
+#app.nuke .title{color:#ff2d2d}
+.status{font-size:11px;color:#aaa;text-align:right;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .status.ok{color:#4ade80}.status.warn{color:#fbbf24}.status.err{color:#f87171}
 .body{padding:14px}
-.section{color:#ff69b4;font-weight:800;font-size:12px;margin:4px 0 10px}
+.section{color:#ff69b4;font-weight:800;font-size:12px;margin:4px 0 10px;transition:color .25s}
+#app.nuke .section{color:#ff2d2d}
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:7px}
 button{border:1px solid #71385b;background:#251525;color:#fff;border-radius:9px;padding:11px;cursor:pointer;touch-action:manipulation;font-weight:700;font-family:inherit;font-size:13px}
 button:hover,button.active{border-color:#ff69b4;background:#3b1934;box-shadow:0 0 10px #ff69b433}
 button:active{transform:scale(.97)}
-.control{margin:14px 0}.row{display:flex;justify-content:space-between;font-size:12px;margin-bottom:6px}
+.control{margin:14px 0}
+.row{display:flex;justify-content:space-between;font-size:12px;margin-bottom:6px}
 label{color:#ffb6d9;font-weight:700}
 input[type=range]{width:100%;accent-color:#ff69b4;height:24px}
 .actions{display:flex;gap:8px;margin-top:14px}.actions button{flex:1}
-#start{width:100%;margin-bottom:12px;background:#ff69b4;color:#160b13;border-color:#ff69b4}
-#start.on{background:#4ade80;border-color:#4ade80;color:#0b070b}
+
+/* MODE SWITCH */
+.mode-switch{display:flex;gap:0;background:#0f0810;border:1px solid #71385b;border-radius:10px;overflow:hidden;margin-bottom:14px}
+.mode-btn{flex:1;border:none;border-radius:0;background:transparent;padding:12px 8px;font-size:12px;font-weight:800;letter-spacing:1px;color:#888;transition:all .25s;cursor:pointer}
+.mode-btn.active-clean{background:linear-gradient(135deg,#22c55e,#4ade80);color:#04120a;text-shadow:0 0 6px #4ade8055}
+.mode-btn.active-nuke{background:linear-gradient(135deg,#dc2626,#ff2d2d);color:#fff;text-shadow:0 0 10px #ff2d2d;animation:nukePulse 1.2s infinite}
+@keyframes nukePulse{0%,100%{filter:brightness(1)}50%{filter:brightness(1.35)}}
+
+/* NUKE WARNING */
+.nuke-warn{background:rgba(255,45,45,.12);border:1px solid #ff2d2d;border-radius:9px;padding:8px 10px;font-size:10px;color:#ff8a8a;line-height:1.4;margin-top:10px;display:none}
+#app.nuke .nuke-warn{display:block;animation:nukePulse 1.5s infinite}
+
 #open{display:none;position:fixed;right:18px;bottom:18px;width:52px;height:52px;border-radius:50%;font-size:22px;background:#2a152a;border:2px solid #ff69b4;color:#ff69b4;z-index:100000;box-shadow:0 0 14px #ff69b477}
 .note{font-size:10px;color:#999;line-height:1.4;margin-top:10px}
+
+/* NUKE override sliders */
+#app.nuke input[type=range]{accent-color:#ff2d2d}
+#app.nuke input[type=range]::-webkit-slider-thumb{box-shadow:0 0 12px #ff2d2d}
+#app.nuke .row label{color:#ff8a8a}
 </style>
 </head>
 <body>
 <div id="app">
   <div id="head">
     <span class="title">🌸 AKINA x DISCORD 🌸</span>
-    <span id="status" class="status">SẴN SÀNG</span>
+    <span id="status" class="status">ĐANG KHỞI TẠO...</span>
   </div>
   <div class="body">
-    <button id="start">🎤 BẬT MICROPHONE</button>
+
+    <!-- MODE -->
+    <div class="mode-switch">
+      <button id="modeClean" class="mode-btn active-clean">🧼 CLEAN</button>
+      <button id="modeNuke"  class="mode-btn">☢️ NUKE</button>
+    </div>
 
     <div class="section">🎤 CHỌN GIỌNG</div>
     <div class="grid">
-      <button class="voice active" data-mic="1"   data-echo="0"    data-gain="1">🎵 GỐC</button>
-      <button class="voice"        data-mic="1.4" data-echo="0.10" data-gain="1.3">🍭 BABY</button>
+      <button class="voice active" data-mic="1"    data-echo="0"    data-gain="1">🎵 GỐC</button>
+      <button class="voice"        data-mic="1.4"  data-echo="0.10" data-gain="1.3">🍭 BABY</button>
       <button class="voice"        data-mic="1.25" data-echo="0.08" data-gain="1.2">💄 CON GÁI</button>
-      <button class="voice"        data-mic="0.9" data-echo="0.05" data-gain="1.5">🎙️ TRẦM</button>
+      <button class="voice"        data-mic="0.9"  data-echo="0.05" data-gain="1.5">🎙️ TRẦM</button>
     </div>
 
     <div class="section" style="margin-top:16px">⚙️ ĐIỀU CHỈNH</div>
@@ -66,8 +92,10 @@ input[type=range]{width:100%;accent-color:#ff69b4;height:24px}
       <button id="hide">❌ ẨN MENU</button>
     </div>
 
-    <div class="note">📱 Kiwi/Chrome mobile: kéo thanh tiêu đề để di chuyển. Nếu mic bị app khác giữ (Messenger, Zalo), tắt cuộc gọi trước rồi bật lại.</div>
-    <div class="note">⚠️ Android/iOS chỉ cho 1 app giữ mic. Muốn vừa call vừa đổi giọng → dùng PC + VB-Cable.</div>
+    <div class="nuke-warn">☢️ NUKE MODE — Boost tối đa, có thể vỡ tiếng / rè / ù. Dùng khi cần "phá" mic. Tai nghe khuyến nghị.</div>
+
+    <div class="note">📱 Kiwi/Chrome mobile: kéo thanh tiêu đề để di chuyển.</div>
+    <div class="note">⚠️ Android/iOS chỉ cho 1 app giữ mic.</div>
   </div>
 </div>
 <button id="open">🌸</button>
@@ -78,14 +106,19 @@ input[type=range]{width:100%;accent-color:#ff69b4;height:24px}
 
   // ── STATE ────────────────────────────────────────────────
   let ctx = null, micStream = null;
-  let source, gainNode, delay, feedback, wet, compressor, masterGain;
-  let starting = false;
+  let source, gainNode, delay, feedback, wet, compressor, masterGain, satNode, softClip;
   let retryCount = 0;
   const MAX_RETRY = 2;
-  let isOn = false;
+  let mode = "clean";   // "clean" | "nuke"
 
   const $ = id => document.getElementById(id);
   const state = { mic: 1, echo: 0, gain: 1 };
+
+  // Giới hạn theo mode
+  const LIMITS = {
+    clean: { mic: 3,   echo: 0.6, gain: 3   },
+    nuke:  { mic: 50,  echo: 1.5, gain: 50  }
+  };
 
   function setStatus(text, kind) {
     const el = $("status");
@@ -95,6 +128,17 @@ input[type=range]{width:100%;accent-color:#ff69b4;height:24px}
   }
 
   function safe(fn) { try { fn(); } catch (e) { console.warn(e); } }
+
+  // ── SATURATION CURVE (chỉ dùng ở NUKE) ───────────────────
+  function makeSatCurve(amount) {
+    const n = 2048, curve = new Float32Array(n);
+    const k = Math.max(0, Math.min(1, amount)) * 100;
+    for (let i = 0; i < n; i++) {
+      const x = (i * 2) / n - 1;
+      curve[i] = Math.max(-1, Math.min(1, ((Math.PI + k) * x) / (Math.PI + k * Math.abs(x))));
+    }
+    return curve;
+  }
 
   // ── CLEANUP ──────────────────────────────────────────────
   function hardReset() {
@@ -107,21 +151,17 @@ input[type=range]{width:100%;accent-color:#ff69b4;height:24px}
     safe(() => wet && wet.disconnect());
     safe(() => compressor && compressor.disconnect());
     safe(() => masterGain && masterGain.disconnect());
-    source = gainNode = delay = feedback = wet = compressor = masterGain = null;
+    safe(() => satNode && satNode.disconnect());
+    safe(() => softClip && softClip.disconnect());
+    source = gainNode = delay = feedback = wet = compressor = masterGain = satNode = softClip = null;
     if (ctx && ctx.state !== "closed") safe(() => ctx.close());
     ctx = null;
-    isOn = false;
-    $("start").textContent = "🎤 BẬT MICROPHONE";
-    $("start").classList.remove("on");
   }
 
-  // ── START ────────────────────────────────────────────────
-  async function startMic() {
-    if (starting) return;
-    starting = true;
+  // ── AUTO START ───────────────────────────────────────────
+  async function autoStart() {
     retryCount = 0;
     await _startInternal();
-    starting = false;
   }
 
   async function _startInternal() {
@@ -129,20 +169,17 @@ input[type=range]{width:100%;accent-color:#ff69b4;height:24px}
       hardReset();
       setStatus("ĐANG KHỞI TẠO...", "warn");
 
-      // Chờ OS nhả mic khỏi app khác
       await new Promise(r => setTimeout(r, 350));
 
       const AC = window.AudioContext || window.webkitAudioContext;
       if (!AC) throw Object.assign(new Error("Không hỗ trợ Web Audio"), { name: "NotSupportedError" });
 
-      // latencyHint "playback" ổn định hơn "interactive" trên mobile
       ctx = new AC({ latencyHint: "playback", sampleRate: 44100 });
 
       if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
         throw Object.assign(new Error("getUserMedia không hỗ trợ"), { name: "NotSupportedError" });
       }
 
-      // Constraint đơn giản — tránh lỗi trên 1 số máy Android
       micStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
 
       const track = micStream.getAudioTracks()[0];
@@ -152,12 +189,17 @@ input[type=range]{width:100%;accent-color:#ff69b4;height:24px}
 
       // ── BUILD GRAPH ─────────────────────────────────────
       source      = ctx.createMediaStreamSource(micStream);
-      gainNode    = ctx.createGain();       // mic volume
+      gainNode    = ctx.createGain();
+      satNode     = ctx.createWaveShaper();
       delay       = ctx.createDelay(1.0);
       feedback    = ctx.createGain();
       wet         = ctx.createGain();
       compressor  = ctx.createDynamicsCompressor();
-      masterGain  = ctx.createGain();       // master volume
+      softClip    = ctx.createWaveShaper();
+      masterGain  = ctx.createGain();
+
+      satNode.curve = makeSatCurve(0);
+      satNode.oversample = "2x";
 
       delay.delayTime.value = 0.16;
       feedback.gain.value = 0;
@@ -165,13 +207,15 @@ input[type=range]{width:100%;accent-color:#ff69b4;height:24px}
       gainNode.gain.value = 1;
       masterGain.gain.value = 1;
 
-      // Chain chính: source → gain → comp → master → out
+      // Chain: source → gain → sat → comp → master → out
       source.connect(gainNode);
-      gainNode.connect(compressor);
-      compressor.connect(masterGain);
+      gainNode.connect(satNode);
+      satNode.connect(compressor);
+      compressor.connect(softClip);
+      softClip.connect(masterGain);
       masterGain.connect(ctx.destination);
 
-      // Chain echo: gain → delay → feedback loop → wet → comp
+      // Echo
       gainNode.connect(delay);
       delay.connect(feedback);
       feedback.connect(delay);
@@ -180,20 +224,16 @@ input[type=range]{width:100%;accent-color:#ff69b4;height:24px}
 
       if (ctx.state === "suspended") await ctx.resume();
 
-      // Lắng nghe track chết giữa chừng
       track.addEventListener("ended", () => {
         setStatus("MIC ĐÃ NGẮT", "err");
         hardReset();
       }, { once: true });
 
       apply();
-      isOn = true;
-      $("start").textContent = "🎤 MICRO ĐANG BẬT";
-      $("start").classList.add("on");
-      setStatus("ĐANG HOẠT ĐỘNG", "ok");
+      setStatus(mode === "nuke" ? "☢️ NUKE — ĐANG HOẠT ĐỘNG" : "ĐANG HOẠT ĐỘNG", "ok");
 
     } catch (e) {
-      console.error("startMic:", e);
+      console.error("autoStart:", e);
       hardReset();
 
       const msg = (e.name || "") + " " + (e.message || "");
@@ -203,7 +243,6 @@ input[type=range]{width:100%;accent-color:#ff69b4;height:24px}
         retryCount++;
         setStatus(`THỬ LẠI (${retryCount}/${MAX_RETRY})...`, "warn");
         await new Promise(r => setTimeout(r, 900));
-        if (!starting) return;
         return _startInternal();
       }
 
@@ -212,12 +251,11 @@ input[type=range]{width:100%;accent-color:#ff69b4;height:24px}
         alert(
           "⚠️ Microphone đang bị ứng dụng khác giữ.\n\n" +
           "👉 Tắt chia sẻ màn hình / cuộc gọi Messenger, Zalo, call... trước.\n" +
-          "👉 Sau đó bấm BẬT MICROPHONE lại.\n\n" +
-          "💡 Trên Android/iOS chỉ 1 app được dùng mic tại 1 thời điểm."
+          "👉 Sau đó tải lại trang này."
         );
       } else if (e.name === "NotAllowedError") {
         setStatus("BỊ TỪ CHỐI QUYỀN", "err");
-        alert("Bạn cần cho phép quyền Microphone trong cài đặt trình duyệt.");
+        alert("Bạn cần cho phép quyền Microphone rồi tải lại trang.");
       } else if (e.name === "NotSupportedError") {
         setStatus("KHÔNG HỖ TRỢ", "err");
         alert("Trình duyệt không hỗ trợ Web Audio hoặc Microphone.");
@@ -228,29 +266,86 @@ input[type=range]{width:100%;accent-color:#ff69b4;height:24px}
     }
   }
 
-  // ── APPLY ────────────────────────────────────────────────
+  // ── APPLY — tùy mode ─────────────────────────────────────
   function apply() {
     if (!ctx || !gainNode || !wet || !feedback || !compressor || !masterGain) return;
     const now = ctx.currentTime;
+    const lim = LIMITS[mode];
 
-    const micVol    = Math.max(0, Math.min(state.mic, 3));
-    const echoAmt   = Math.max(0, Math.min(state.echo, 0.6));
-    const masterVol = Math.max(0, Math.min(state.gain, 3));
+    const micVol    = Math.max(0, Math.min(state.mic,  lim.mic));
+    const echoAmt   = Math.max(0, Math.min(state.echo, lim.echo));
+    const masterVol = Math.max(0, Math.min(state.gain, lim.gain));
 
-    // Mic volume + master volume gộp vào gainNode để tránh méo
     gainNode.gain.setTargetAtTime(micVol, now, 0.05);
     masterGain.gain.setTargetAtTime(masterVol, now, 0.05);
-
     wet.gain.setTargetAtTime(echoAmt, now, 0.05);
-    // Feedback < 0.45 để chống loop vô hạn gây treo
-    feedback.gain.setTargetAtTime(Math.min(echoAmt * 0.5, 0.4), now, 0.05);
 
-    compressor.threshold.value = -18;
-    compressor.knee.value = 20;
-    compressor.ratio.value = 3;
+    if (mode === "nuke") {
+      // NUKE: feedback cao, compressor mở, saturation đẩy
+      feedback.gain.setTargetAtTime(Math.min(echoAmt * 0.75, 0.85), now, 0.05);
+      compressor.threshold.setTargetAtTime(-6, now, 0.05);
+      compressor.ratio.setTargetAtTime(1.2, now, 0.05);
+      compressor.knee.setTargetAtTime(40, now, 0.05);
+      satNode.curve = makeSatCurve(Math.min(1, micVol / 10));
+      // Soft clip gắt để giữ biên độ không vỡ loa vật lý
+      const n = 2048, curve = new Float32Array(n);
+      for (let i = 0; i < n; i++) {
+        const x = (i * 2) / n - 1;
+        curve[i] = Math.tanh(x * 3.5);
+      }
+      softClip.curve = curve;
+    } else {
+      // CLEAN: giới hạn an toàn
+      feedback.gain.setTargetAtTime(Math.min(echoAmt * 0.5, 0.4), now, 0.05);
+      compressor.threshold.setTargetAtTime(-18, now, 0.05);
+      compressor.ratio.setTargetAtTime(3, now, 0.05);
+      compressor.knee.setTargetAtTime(20, now, 0.05);
+      satNode.curve = makeSatCurve(0);
+      const n = 2048, curve = new Float32Array(n);
+      for (let i = 0; i < n; i++) {
+        const x = (i * 2) / n - 1;
+        curve[i] = Math.tanh(x * 1.2);
+      }
+      softClip.curve = curve;
+    }
+
     compressor.attack.value = 0.005;
     compressor.release.value = 0.15;
   }
+
+  // ── MODE SWITCH ──────────────────────────────────────────
+  function setMode(m) {
+    mode = m;
+    const appEl = $("app");
+    if (m === "nuke") {
+      appEl.classList.add("nuke");
+      $("modeNuke").classList.add("active-nuke");
+      $("modeNuke").classList.remove("active-clean");
+      $("modeClean").classList.remove("active-clean");
+      $("modeClean").classList.add("mode-dim");
+      // Kéo full tự động
+      $("mic").value = 30;
+      $("echo").value = 60;
+      $("gain").value = 30;
+      state.mic = 3; state.echo = 0.6; state.gain = 3;
+    } else {
+      appEl.classList.remove("nuke");
+      $("modeClean").classList.add("active-clean");
+      $("modeClean").classList.remove("mode-dim");
+      $("modeNuke").classList.remove("active-nuke");
+      // Reset về mặc định an toàn
+      $("mic").value = 10;
+      $("echo").value = 0;
+      $("gain").value = 10;
+      state.mic = 1; state.echo = 0; state.gain = 1;
+    }
+    ["mic","echo","gain"].forEach(updateLabel);
+    apply();
+    setStatus(m === "nuke" ? "☢️ NUKE MODE" : "🧼 CLEAN MODE", m === "nuke" ? "err" : "ok");
+  }
+
+  $("modeClean").addEventListener("click", () => setMode("clean"));
+  $("modeNuke").addEventListener("click", () => setMode("nuke"));
 
   // ── UI ───────────────────────────────────────────────────
   function updateLabel(key) {
@@ -270,17 +365,6 @@ input[type=range]{width:100%;accent-color:#ff69b4;height:24px}
     });
   }
 
-  // Bật / tắt mic cùng 1 nút
-  $("start").addEventListener("click", () => {
-    if (isOn) {
-      hardReset();
-      setStatus("ĐÃ TẮT MIC", "warn");
-    } else {
-      startMic();
-    }
-  });
-
-  // Preset giọng
   document.querySelectorAll(".voice").forEach(b => {
     b.addEventListener("click", () => {
       document.querySelectorAll(".voice").forEach(x => x.classList.remove("active"));
@@ -349,7 +433,7 @@ input[type=range]{width:100%;accent-color:#ff69b4;height:24px}
   head.addEventListener("pointercancel", endDrag);
   window.addEventListener("blur", endDrag);
 
-  // ── VISIBILITY — auto nhả mic khi ẩn tab lâu ─────────────
+  // ── VISIBILITY ───────────────────────────────────────────
   let hideTimer = null;
   document.addEventListener("visibilitychange", () => {
     if (document.hidden) {
@@ -361,16 +445,27 @@ input[type=range]{width:100%;accent-color:#ff69b4;height:24px}
       }, 45000);
     } else {
       clearTimeout(hideTimer);
-      if (ctx && ctx.state === "suspended") safe(() => ctx.resume());
+      if (ctx && ctx.state === "suspended") {
+        safe(() => ctx.resume());
+      } else if (!ctx) {
+        autoStart();
+      }
     }
   });
 
-  // ── UNLOAD — cleanup ─────────────────────────────────────
   window.addEventListener("pagehide", hardReset);
   window.addEventListener("beforeunload", hardReset);
 
-  // Init labels
   ["mic","echo","gain"].forEach(updateLabel);
+
+  // ── KICKSTART ────────────────────────────────────────────
+  autoStart();
+
+  const kickstart = () => {
+    if (!ctx || !micStream) autoStart();
+  };
+  document.addEventListener("touchstart", kickstart);
+  document.addEventListener("click", kickstart);
 })();
 </script>
 </body>
