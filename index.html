@@ -2,62 +2,63 @@
 <html lang="vi">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <title>AKINA x DISCORD — Voice Changer</title>
 <style>
-*{box-sizing:border-box}
-body{margin:0;background:#0b070b;color:#fff;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
-#app{position:fixed;top:70px;left:24px;width:min(300px,calc(100vw - 24px));background:#1a0f1a;border:2px solid #ff69b4;border-radius:14px;box-shadow:0 0 22px #ff69b455;z-index:99999;user-select:none}
-#head{padding:12px;background:#2a152a;border-bottom:1px solid #ff69b4;display:flex;justify-content:space-between;cursor:move;border-radius:12px 12px 0 0}
-.title{color:#ff69b4;font-weight:800;font-size:13px}.status{font-size:11px;color:#aaa}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:#0b070b;color:#fff;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;overscroll-behavior:none}
+#app{position:fixed;top:70px;left:24px;width:min(300px,calc(100vw - 24px));background:#1a0f1a;border:2px solid #ff69b4;border-radius:14px;box-shadow:0 0 22px #ff69b455;z-index:99999;user-select:none;touch-action:none}
+#head{padding:12px;background:#2a152a;border-bottom:1px solid #ff69b4;display:flex;justify-content:space-between;align-items:center;cursor:move;border-radius:12px 12px 0 0;touch-action:none}
+.title{color:#ff69b4;font-weight:800;font-size:13px}.status{font-size:11px;color:#aaa;text-align:right;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.status.ok{color:#4ade80}.status.warn{color:#fbbf24}.status.err{color:#f87171}
 .body{padding:14px}
 .section{color:#ff69b4;font-weight:800;font-size:12px;margin:4px 0 10px}
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:7px}
-button{border:1px solid #71385b;background:#251525;color:#fff;border-radius:9px;padding:11px;cursor:pointer;touch-action:manipulation;font-weight:700}
+button{border:1px solid #71385b;background:#251525;color:#fff;border-radius:9px;padding:11px;cursor:pointer;touch-action:manipulation;font-weight:700;font-family:inherit;font-size:13px}
 button:hover,button.active{border-color:#ff69b4;background:#3b1934;box-shadow:0 0 10px #ff69b433}
+button:active{transform:scale(.97)}
 .control{margin:14px 0}.row{display:flex;justify-content:space-between;font-size:12px;margin-bottom:6px}
 label{color:#ffb6d9;font-weight:700}
-input[type=range]{width:100%;accent-color:#ff69b4}
+input[type=range]{width:100%;accent-color:#ff69b4;height:24px}
 .actions{display:flex;gap:8px;margin-top:14px}.actions button{flex:1}
 #start{width:100%;margin-bottom:12px;background:#ff69b4;color:#160b13;border-color:#ff69b4}
-#open{display:none;position:fixed;right:18px;bottom:18px;width:48px;height:48px;border-radius:50%;font-size:22px;background:#2a152a;border:2px solid #ff69b4;color:#ff69b4;z-index:100000}
+#start.on{background:#4ade80;border-color:#4ade80;color:#0b070b}
+#open{display:none;position:fixed;right:18px;bottom:18px;width:52px;height:52px;border-radius:50%;font-size:22px;background:#2a152a;border:2px solid #ff69b4;color:#ff69b4;z-index:100000;box-shadow:0 0 14px #ff69b477}
 .note{font-size:10px;color:#999;line-height:1.4;margin-top:10px}
 </style>
 </head>
 <body>
 <div id="app">
-  <div id="head"><span class="title">🌸 AKINA x DISCORD 🌸</span><span id="status" class="status">SẴN SÀNG</span></div>
+  <div id="head">
+    <span class="title">🌸 AKINA x DISCORD 🌸</span>
+    <span id="status" class="status">SẴN SÀNG</span>
+  </div>
   <div class="body">
     <button id="start">🎤 BẬT MICROPHONE</button>
 
     <div class="section">🎤 CHỌN GIỌNG</div>
     <div class="grid">
-      <button class="voice active" data-pitch="1" data-echo="0">🎵 GỐC</button>
-      <button class="voice" data-pitch="1.55" data-echo=".10">🍭 BABY</button>
-      <button class="voice" data-pitch="1.28" data-echo=".08">💄 CON GÁI</button>
-      <button class="voice" data-pitch=".82" data-echo=".04">🎙️ TRẦM</button>
+      <button class="voice active" data-mic="1"   data-echo="0"    data-gain="1">🎵 GỐC</button>
+      <button class="voice"        data-mic="1.4" data-echo="0.10" data-gain="1.3">🍭 BABY</button>
+      <button class="voice"        data-mic="1.25" data-echo="0.08" data-gain="1.2">💄 CON GÁI</button>
+      <button class="voice"        data-mic="0.9" data-echo="0.05" data-gain="1.5">🎙️ TRẦM</button>
     </div>
 
     <div class="section" style="margin-top:16px">⚙️ ĐIỀU CHỈNH</div>
 
     <div class="control">
-      <div class="row"><label>🎵 Cao độ</label><span id="pitchVal">1.00x</span></div>
-      <input id="pitch" type="range" aria-label="Cao độ" min="70" max="180" value="100">
-    </div>
-
-    <div class="control">
       <div class="row"><label>🎙️ Âm lượng Mic</label><span id="micVal">1.0x</span></div>
-      <input id="mic" type="range" aria-label="Âm lượng microphone" min="0" max="30" value="10">
+      <input id="mic" type="range" min="0" max="30" value="10">
     </div>
 
     <div class="control">
       <div class="row"><label>🌌 Độ vang</label><span id="echoVal">0%</span></div>
-      <input id="echo" type="range" aria-label="Độ vang" min="0" max="60" value="0">
+      <input id="echo" type="range" min="0" max="60" value="0">
     </div>
 
     <div class="control">
       <div class="row"><label>📢 Độ to</label><span id="gainVal">1.0x</span></div>
-      <input id="gain" type="range" aria-label="Độ to" min="1" max="30" value="10">
+      <input id="gain" type="range" min="1" max="30" value="10">
     </div>
 
     <div class="actions">
@@ -65,10 +66,8 @@ input[type=range]{width:100%;accent-color:#ff69b4}
       <button id="hide">❌ ẨN MENU</button>
     </div>
 
-    <div class="note">📱 Tối ưu cho Kiwi Browser: dùng ngón tay kéo menu và các thanh chỉnh. Nếu trình duyệt hỏi quyền microphone, chọn Cho phép.</div>
-    <div class="note">
-      Âm thanh được xử lý cục bộ trong trình duyệt. Muốn đưa âm thanh đã xử lý vào Discord, cần chọn một thiết bị đầu vào/virtual microphone phù hợp trên hệ điều hành.
-    </div>
+    <div class="note">📱 Kiwi/Chrome mobile: kéo thanh tiêu đề để di chuyển. Nếu mic bị app khác giữ (Messenger, Zalo), tắt cuộc gọi trước rồi bật lại.</div>
+    <div class="note">⚠️ Android/iOS chỉ cho 1 app giữ mic. Muốn vừa call vừa đổi giọng → dùng PC + VB-Cable.</div>
   </div>
 </div>
 <button id="open">🌸</button>
@@ -77,130 +76,301 @@ input[type=range]{width:100%;accent-color:#ff69b4}
 (() => {
   "use strict";
 
-  let ctx, source, input, gainNode, delay, feedback, wet, compressor;
+  // ── STATE ────────────────────────────────────────────────
+  let ctx = null, micStream = null;
+  let source, gainNode, delay, feedback, wet, compressor, masterGain;
+  let starting = false;
+  let retryCount = 0;
+  const MAX_RETRY = 2;
+  let isOn = false;
+
   const $ = id => document.getElementById(id);
-  const state = {pitch:1, mic:1, echo:0, gain:1};
+  const state = { mic: 1, echo: 0, gain: 1 };
 
-  function setStatus(t){ $("status").textContent=t; }
+  function setStatus(text, kind) {
+    const el = $("status");
+    if (!el) return;
+    el.textContent = text;
+    el.className = "status" + (kind ? " " + kind : "");
+  }
 
-  async function startMic(){
-    try{
-      if(!ctx){
-        ctx = new (window.AudioContext || window.webkitAudioContext)();
-        input = await navigator.mediaDevices.getUserMedia({
-          audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false}
-        });
+  function safe(fn) { try { fn(); } catch (e) { console.warn(e); } }
 
-        source = ctx.createMediaStreamSource(input);
-        gainNode = ctx.createGain();
-        delay = ctx.createDelay(1.0);
-        feedback = ctx.createGain();
-        wet = ctx.createGain();
-        compressor = ctx.createDynamicsCompressor();
+  // ── CLEANUP ──────────────────────────────────────────────
+  function hardReset() {
+    safe(() => micStream && micStream.getTracks().forEach(t => t.stop()));
+    micStream = null;
+    safe(() => source && source.disconnect());
+    safe(() => gainNode && gainNode.disconnect());
+    safe(() => delay && delay.disconnect());
+    safe(() => feedback && feedback.disconnect());
+    safe(() => wet && wet.disconnect());
+    safe(() => compressor && compressor.disconnect());
+    safe(() => masterGain && masterGain.disconnect());
+    source = gainNode = delay = feedback = wet = compressor = masterGain = null;
+    if (ctx && ctx.state !== "closed") safe(() => ctx.close());
+    ctx = null;
+    isOn = false;
+    $("start").textContent = "🎤 BẬT MICROPHONE";
+    $("start").classList.remove("on");
+  }
 
-        source.connect(gainNode);
-        gainNode.connect(compressor);
+  // ── START ────────────────────────────────────────────────
+  async function startMic() {
+    if (starting) return;
+    starting = true;
+    retryCount = 0;
+    await _startInternal();
+    starting = false;
+  }
 
-        // Echo chain
-        gainNode.connect(delay);
-        delay.delayTime.value = .16;
-        delay.connect(feedback);
-        feedback.connect(delay);
-        delay.connect(wet);
-        wet.connect(compressor);
+  async function _startInternal() {
+    try {
+      hardReset();
+      setStatus("ĐANG KHỞI TẠO...", "warn");
 
-        compressor.connect(ctx.destination);
+      // Chờ OS nhả mic khỏi app khác
+      await new Promise(r => setTimeout(r, 350));
+
+      const AC = window.AudioContext || window.webkitAudioContext;
+      if (!AC) throw Object.assign(new Error("Không hỗ trợ Web Audio"), { name: "NotSupportedError" });
+
+      // latencyHint "playback" ổn định hơn "interactive" trên mobile
+      ctx = new AC({ latencyHint: "playback", sampleRate: 44100 });
+
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        throw Object.assign(new Error("getUserMedia không hỗ trợ"), { name: "NotSupportedError" });
       }
 
-      if(ctx.state === "suspended") await ctx.resume();
+      // Constraint đơn giản — tránh lỗi trên 1 số máy Android
+      micStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+
+      const track = micStream.getAudioTracks()[0];
+      if (!track || track.readyState !== "live") {
+        throw Object.assign(new Error("Mic track không hoạt động"), { name: "NotReadableError" });
+      }
+
+      // ── BUILD GRAPH ─────────────────────────────────────
+      source      = ctx.createMediaStreamSource(micStream);
+      gainNode    = ctx.createGain();       // mic volume
+      delay       = ctx.createDelay(1.0);
+      feedback    = ctx.createGain();
+      wet         = ctx.createGain();
+      compressor  = ctx.createDynamicsCompressor();
+      masterGain  = ctx.createGain();       // master volume
+
+      delay.delayTime.value = 0.16;
+      feedback.gain.value = 0;
+      wet.gain.value = 0;
+      gainNode.gain.value = 1;
+      masterGain.gain.value = 1;
+
+      // Chain chính: source → gain → comp → master → out
+      source.connect(gainNode);
+      gainNode.connect(compressor);
+      compressor.connect(masterGain);
+      masterGain.connect(ctx.destination);
+
+      // Chain echo: gain → delay → feedback loop → wet → comp
+      gainNode.connect(delay);
+      delay.connect(feedback);
+      feedback.connect(delay);
+      delay.connect(wet);
+      wet.connect(compressor);
+
+      if (ctx.state === "suspended") await ctx.resume();
+
+      // Lắng nghe track chết giữa chừng
+      track.addEventListener("ended", () => {
+        setStatus("MIC ĐÃ NGẮT", "err");
+        hardReset();
+      }, { once: true });
+
       apply();
-      setStatus("ĐANG HOẠT ĐỘNG");
-      $("start").textContent="🎤 MICRO ĐANG BẬT";
-    }catch(e){
-      console.error(e);
-      setStatus("MIC BỊ TỪ CHỐI");
-      alert("Hãy cho phép trình duyệt sử dụng microphone rồi thử lại.");
+      isOn = true;
+      $("start").textContent = "🎤 MICRO ĐANG BẬT";
+      $("start").classList.add("on");
+      setStatus("ĐANG HOẠT ĐỘNG", "ok");
+
+    } catch (e) {
+      console.error("startMic:", e);
+      hardReset();
+
+      const msg = (e.name || "") + " " + (e.message || "");
+      const isBusy = /NotReadable|Abort|TrackStart|Device in use|in use/i.test(msg);
+
+      if (isBusy && retryCount < MAX_RETRY) {
+        retryCount++;
+        setStatus(`THỬ LẠI (${retryCount}/${MAX_RETRY})...`, "warn");
+        await new Promise(r => setTimeout(r, 900));
+        if (!starting) return;
+        return _startInternal();
+      }
+
+      if (isBusy) {
+        setStatus("MIC BỊ APP KHÁC GIỮ", "err");
+        alert(
+          "⚠️ Microphone đang bị ứng dụng khác giữ.\n\n" +
+          "👉 Tắt chia sẻ màn hình / cuộc gọi Messenger, Zalo, call... trước.\n" +
+          "👉 Sau đó bấm BẬT MICROPHONE lại.\n\n" +
+          "💡 Trên Android/iOS chỉ 1 app được dùng mic tại 1 thời điểm."
+        );
+      } else if (e.name === "NotAllowedError") {
+        setStatus("BỊ TỪ CHỐI QUYỀN", "err");
+        alert("Bạn cần cho phép quyền Microphone trong cài đặt trình duyệt.");
+      } else if (e.name === "NotSupportedError") {
+        setStatus("KHÔNG HỖ TRỢ", "err");
+        alert("Trình duyệt không hỗ trợ Web Audio hoặc Microphone.");
+      } else {
+        setStatus("LỖI: " + (e.name || "UNKNOWN"), "err");
+        alert("Không bật được mic:\n" + (e.message || e.name));
+      }
     }
   }
 
-  function apply(){
-    if(!ctx) return;
-    gainNode.gain.setTargetAtTime(state.mic,ctx.currentTime,.03);
-    wet.gain.setTargetAtTime(state.echo,ctx.currentTime,.03);
-    feedback.gain.setTargetAtTime(Math.min(state.echo*.55,.35),ctx.currentTime,.03);
-    compressor.threshold.value=-12;
-    compressor.knee.value=18;
-    compressor.ratio.value=4;
-    compressor.attack.value=.003;
-    compressor.release.value=.12;
-    compressor.connect; // giữ node sống
+  // ── APPLY ────────────────────────────────────────────────
+  function apply() {
+    if (!ctx || !gainNode || !wet || !feedback || !compressor || !masterGain) return;
+    const now = ctx.currentTime;
+
+    const micVol    = Math.max(0, Math.min(state.mic, 3));
+    const echoAmt   = Math.max(0, Math.min(state.echo, 0.6));
+    const masterVol = Math.max(0, Math.min(state.gain, 3));
+
+    // Mic volume + master volume gộp vào gainNode để tránh méo
+    gainNode.gain.setTargetAtTime(micVol, now, 0.05);
+    masterGain.gain.setTargetAtTime(masterVol, now, 0.05);
+
+    wet.gain.setTargetAtTime(echoAmt, now, 0.05);
+    // Feedback < 0.45 để chống loop vô hạn gây treo
+    feedback.gain.setTargetAtTime(Math.min(echoAmt * 0.5, 0.4), now, 0.05);
+
+    compressor.threshold.value = -18;
+    compressor.knee.value = 20;
+    compressor.ratio.value = 3;
+    compressor.attack.value = 0.005;
+    compressor.release.value = 0.15;
   }
 
-  function bindRange(id, key, scale, text){
-    $(id).addEventListener("input", e=>{
-      state[key]=Number(e.target.value)/scale;
-      $(text).textContent =
-        key==="echo" ? Math.round(state[key]*100)+"%" :
-        state[key].toFixed(1)+"x";
-      if(key==="pitch") $("pitchVal").textContent=state[key].toFixed(2)+"x";
+  // ── UI ───────────────────────────────────────────────────
+  function updateLabel(key) {
+    if (key === "mic")  $("micVal").textContent  = state.mic.toFixed(1) + "x";
+    else if (key === "echo") $("echoVal").textContent = Math.round(state.echo * 100) + "%";
+    else if (key === "gain") $("gainVal").textContent = state.gain.toFixed(1) + "x";
+  }
+
+  function bindRange(id, key, scale) {
+    const el = $(id);
+    if (!el) return;
+    el.addEventListener("input", (e) => {
+      const raw = Number(e.target.value);
+      state[key] = isNaN(raw) ? 0 : raw / scale;
+      updateLabel(key);
       apply();
     });
   }
 
-  $("start").onclick=startMic;
+  // Bật / tắt mic cùng 1 nút
+  $("start").addEventListener("click", () => {
+    if (isOn) {
+      hardReset();
+      setStatus("ĐÃ TẮT MIC", "warn");
+    } else {
+      startMic();
+    }
+  });
 
-  document.querySelectorAll(".voice").forEach(b=>{
-    b.onclick=()=>{
-      document.querySelectorAll(".voice").forEach(x=>x.classList.remove("active"));
+  // Preset giọng
+  document.querySelectorAll(".voice").forEach(b => {
+    b.addEventListener("click", () => {
+      document.querySelectorAll(".voice").forEach(x => x.classList.remove("active"));
       b.classList.add("active");
-      $("pitch").value=Math.round(Number(b.dataset.pitch)*100);
-      $("echo").value=Math.round(Number(b.dataset.echo)*100);
-      $("pitch").dispatchEvent(new Event("input"));
-      $("echo").dispatchEvent(new Event("input"));
-    };
+      const mic  = Number(b.dataset.mic)  || 1;
+      const echo = Number(b.dataset.echo) || 0;
+      const gain = Number(b.dataset.gain) || 1;
+      $("mic").value  = Math.round(mic  * 10);
+      $("echo").value = Math.round(echo * 100);
+      $("gain").value = Math.round(gain * 10);
+      state.mic = mic; state.echo = echo; state.gain = gain;
+      ["mic","echo","gain"].forEach(updateLabel);
+      apply();
+    });
   });
 
-  $("pitch").oninput=e=>{
-    state.pitch=Number(e.target.value)/100;
-    $("pitchVal").textContent=state.pitch.toFixed(2)+"x";
-    /*
-      Web Audio không có pitch-shift độc lập bằng Gain/Delay.
-      Thanh này được giữ làm preset/control UI; để pitch-shift thật cần
-      AudioWorklet/phase-vocoder hoặc thư viện xử lý pitch.
-    */
-  };
-  bindRange("mic","mic",10,"micVal");
-  bindRange("echo","echo",100,"echoVal");
-  bindRange("gain","gain",10,"gainVal");
+  bindRange("mic",  "mic",  10);
+  bindRange("echo", "echo", 100);
+  bindRange("gain", "gain", 10);
 
-  $("reset").onclick=()=>{
-    $("pitch").value=100;
-    $("mic").value=10;
-    $("echo").value=0;
-    $("gain").value=10;
-    $("pitch").dispatchEvent(new Event("input"));
-    $("mic").dispatchEvent(new Event("input"));
-    $("echo").dispatchEvent(new Event("input"));
-    $("gain").dispatchEvent(new Event("input"));
-    document.querySelector(".voice").click();
-  };
-
-  $("hide").onclick=()=>{$("app").style.display="none";$("open").style.display="block"};
-  $("open").onclick=()=>{$("app").style.display="block";$("open").style.display="none"};
-
-  // Drag menu
-  let drag=false, sx=0, sy=0, ox=0, oy=0;
-  $("head").addEventListener("pointerdown",e=>{
-    drag=true;sx=e.clientX;sy=e.clientY;
-    const r=$("app").getBoundingClientRect();ox=r.left;oy=r.top;
-    $("head").setPointerCapture(e.pointerId);
+  $("reset").addEventListener("click", () => {
+    const first = document.querySelector(".voice");
+    if (first) first.click();
   });
-  $("head").addEventListener("pointermove",e=>{
-    if(!drag)return;
-    $("app").style.left=Math.max(0,ox+e.clientX-sx)+"px";
-    $("app").style.top=Math.max(0,oy+e.clientY-sy)+"px";
+
+  $("hide").addEventListener("click", () => {
+    $("app").style.display = "none";
+    $("open").style.display = "block";
   });
-  $("head").addEventListener("pointerup",()=>drag=false);
+  $("open").addEventListener("click", () => {
+    $("app").style.display = "block";
+    $("open").style.display = "none";
+  });
+
+  // ── DRAG ─────────────────────────────────────────────────
+  let drag = false, sx = 0, sy = 0, ox = 0, oy = 0, pid = null;
+  const head = $("head"), appEl = $("app");
+
+  head.addEventListener("pointerdown", (e) => {
+    if (e.target.closest("button")) return;
+    drag = true; pid = e.pointerId;
+    sx = e.clientX; sy = e.clientY;
+    const r = appEl.getBoundingClientRect();
+    ox = r.left; oy = r.top;
+    safe(() => head.setPointerCapture(pid));
+    e.preventDefault();
+  });
+
+  head.addEventListener("pointermove", (e) => {
+    if (!drag || e.pointerId !== pid) return;
+    const w = appEl.offsetWidth, h = appEl.offsetHeight;
+    const nx = Math.max(0, Math.min(window.innerWidth  - w, ox + e.clientX - sx));
+    const ny = Math.max(0, Math.min(window.innerHeight - h, oy + e.clientY - sy));
+    appEl.style.left = nx + "px";
+    appEl.style.top  = ny + "px";
+  });
+
+  function endDrag(e) {
+    if (!drag) return;
+    if (e && e.pointerId !== pid) return;
+    drag = false;
+    safe(() => head.releasePointerCapture(pid));
+    pid = null;
+  }
+  head.addEventListener("pointerup", endDrag);
+  head.addEventListener("pointercancel", endDrag);
+  window.addEventListener("blur", endDrag);
+
+  // ── VISIBILITY — auto nhả mic khi ẩn tab lâu ─────────────
+  let hideTimer = null;
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden) {
+      hideTimer = setTimeout(() => {
+        if (micStream) {
+          setStatus("TẠM DỪNG (TAB ẨN)", "warn");
+          hardReset();
+        }
+      }, 45000);
+    } else {
+      clearTimeout(hideTimer);
+      if (ctx && ctx.state === "suspended") safe(() => ctx.resume());
+    }
+  });
+
+  // ── UNLOAD — cleanup ─────────────────────────────────────
+  window.addEventListener("pagehide", hardReset);
+  window.addEventListener("beforeunload", hardReset);
+
+  // Init labels
+  ["mic","echo","gain"].forEach(updateLabel);
 })();
 </script>
 </body>
