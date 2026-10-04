@@ -3,586 +3,204 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>🦈 BIG SHARK — Reverb + Xả Nhạc</title>
+<title>AKINA x DISCORD — Voice Changer</title>
 <style>
 *{box-sizing:border-box}
-body{margin:0;background:transparent;font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif}
-
-#bm-ui{
-  position:fixed;top:20px;right:20px;width:280px;background:#ffffff;
-  border:2px solid #e0e0e0;padding:16px;border-radius:14px;
-  color:#1a1a1a;z-index:2147483646;
-  box-shadow:0 10px 40px rgba(0,0,0,0.15);
-  max-height:88vh;overflow-y:auto;
-}
-
-.bm-label{
-  font-size:10px;font-weight:600;color:#555;
-  margin-top:8px;margin-bottom:3px;letter-spacing:0.3px;
-}
-#bm-ui input[type=range]{
-  width:100%;height:6px;background:#e0e0e0;border-radius:3px;
-  accent-color:#1a237e;cursor:pointer;outline:none;margin-bottom:2px;
-}
-#bm-ui input[type=range]::-webkit-slider-thumb{
-  -webkit-appearance:none;appearance:none;width:16px;height:16px;
-  background:#1a237e;border-radius:50%;cursor:pointer;
-  box-shadow:0 2px 6px rgba(26,35,126,0.3);
-}
-
-#bm-act{
-  width:100%;padding:12px;
-  background:linear-gradient(135deg,#1a237e,#0d47a1);
-  color:#fff;font-weight:bold;font-size:12px;border:none;
-  border-radius:8px;cursor:pointer;margin-bottom:14px;
-  box-shadow:0 4px 15px rgba(13,71,161,0.3);
-  transition:all 0.3s ease;
-}
-#bm-act.active{
-  background:linear-gradient(135deg,#00b09b,#2ecc71) !important;
-  box-shadow:0 4px 15px rgba(46,204,113,0.4) !important;
-}
-
-#bm-music-btn{
-  width:100%;padding:12px;
-  background:linear-gradient(135deg,#4a148c,#7b1fa2);
-  color:#fff;font-weight:bold;font-size:12px;border:none;
-  border-radius:8px;cursor:pointer;margin-bottom:10px;
-  box-shadow:0 4px 15px rgba(123,31,162,0.3);
-  transition:all 0.3s ease;
-}
-#bm-music-btn.active{
-  background:linear-gradient(135deg,#e91e63,#ff5722) !important;
-  animation:bm-pulse 1.5s infinite;
-}
-@keyframes bm-pulse{
-  0%,100%{box-shadow:0 4px 15px rgba(233,30,99,0.4)}
-  50%{box-shadow:0 4px 25px rgba(233,30,99,0.8)}
-}
+body{margin:0;background:#0b070b;color:#fff;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+#app{position:fixed;top:70px;left:24px;width:min(300px,calc(100vw - 24px));background:#1a0f1a;border:2px solid #ff69b4;border-radius:14px;box-shadow:0 0 22px #ff69b455;z-index:99999;user-select:none}
+#head{padding:12px;background:#2a152a;border-bottom:1px solid #ff69b4;display:flex;justify-content:space-between;cursor:move;border-radius:12px 12px 0 0}
+.title{color:#ff69b4;font-weight:800;font-size:13px}.status{font-size:11px;color:#aaa}
+.body{padding:14px}
+.section{color:#ff69b4;font-weight:800;font-size:12px;margin:4px 0 10px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+button{border:1px solid #71385b;background:#251525;color:#fff;border-radius:9px;padding:11px;cursor:pointer;touch-action:manipulation;font-weight:700}
+button:hover,button.active{border-color:#ff69b4;background:#3b1934;box-shadow:0 0 10px #ff69b433}
+.control{margin:14px 0}.row{display:flex;justify-content:space-between;font-size:12px;margin-bottom:6px}
+label{color:#ffb6d9;font-weight:700}
+input[type=range]{width:100%;accent-color:#ff69b4}
+.actions{display:flex;gap:8px;margin-top:14px}.actions button{flex:1}
+#start{width:100%;margin-bottom:12px;background:#ff69b4;color:#160b13;border-color:#ff69b4}
+#open{display:none;position:fixed;right:18px;bottom:18px;width:48px;height:48px;border-radius:50%;font-size:22px;background:#2a152a;border:2px solid #ff69b4;color:#ff69b4;z-index:100000}
+.note{font-size:10px;color:#999;line-height:1.4;margin-top:10px}
 </style>
 </head>
 <body>
+<div id="app">
+  <div id="head"><span class="title">🌸 AKINA x DISCORD 🌸</span><span id="status" class="status">SẴN SÀNG</span></div>
+  <div class="body">
+    <button id="start">🎤 BẬT MICROPHONE</button>
 
-<div id="bm-ui">
-  <div style="font-weight:900;font-size:15px;letter-spacing:1px;border-bottom:2px solid #ddd;padding-bottom:12px;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center;">
-    <span style="color:#1a1a1a;">🦈 BIG SHARK</span>
-    <span id="bm-st" style="color:#2196F3;font-size:10px;font-weight:bold;">STANDBY</span>
-  </div>
-
-  <button id="bm-act">⚡ KÍCH HOẠT BIG SHARK</button>
-
-  <div style="background:#f5f5f5;padding:12px;border-radius:8px;margin-bottom:10px;">
-    <div class="bm-label">🎤 GAIN MIC (Điều chỉnh vừa đủ rõ)</div>
-    <input type="range" id="bm-ingain" min="1" max="50" step="1" value="30">
-
-    <div class="bm-label">🔊 BASS (Ấm giọng)</div>
-    <input type="range" id="bm-bass" min="0" max="20" step="0.5" value="8">
-
-    <div class="bm-label">🎵 MID (Rõ tiếng)</div>
-    <input type="range" id="bm-mid" min="0" max="12" step="0.5" value="6">
-
-    <div class="bm-label">✨ TREBLE (Sáng trong)</div>
-    <input type="range" id="bm-treble" min="-10" max="10" step="0.5" value="3">
-
-    <div class="bm-label">🌊 REVERB 140% (Vang 5s)</div>
-    <input type="range" id="bm-rev" min="0" max="200" value="140">
-  </div>
-
-  <!-- ===== XẢ NHẠC ===== -->
-  <div style="border-top:2px dashed #ddd;margin-top:14px;padding-top:14px;">
-    <div style="font-size:11px;font-weight:900;color:#7b1fa2;letter-spacing:1px;margin-bottom:10px;">
-      🎵 XẢ NHẠC MP3
+    <div class="section">🎤 CHỌN GIỌNG</div>
+    <div class="grid">
+      <button class="voice active" data-pitch="1" data-echo="0">🎵 GỐC</button>
+      <button class="voice" data-pitch="1.55" data-echo=".10">🍭 BABY</button>
+      <button class="voice" data-pitch="1.28" data-echo=".08">💄 CON GÁI</button>
+      <button class="voice" data-pitch=".82" data-echo=".04">🎙️ TRẦM</button>
     </div>
 
-    <div style="background:#f3e5f5;padding:10px;border-radius:8px;margin-bottom:10px;border-left:3px solid #9c27b0;">
-      <input type="file" id="bm-file" accept="audio/mpeg,audio/mp3,audio/*,.mp3,.wav,.m4a,.ogg" style="width:100%;font-size:11px;">
-      <div id="bm-file-name" style="font-size:10px;color:#666;margin-top:6px;font-style:italic;">Chưa chọn file</div>
+    <div class="section" style="margin-top:16px">⚙️ ĐIỀU CHỈNH</div>
+
+    <div class="control">
+      <div class="row"><label>🎵 Cao độ</label><span id="pitchVal">1.00x</span></div>
+      <input id="pitch" type="range" aria-label="Cao độ" min="70" max="180" value="100">
     </div>
 
-    <button id="bm-music-btn">🎵 BẬT XẢ NHẠC</button>
-
-    <div style="background:#f5f5f5;padding:10px;border-radius:8px;">
-      <div class="bm-label">🔊 ÂM LƯỢNG NHẠC (%)</div>
-      <input type="range" id="bm-music-vol" min="0" max="500" value="200">
-
-      <div class="bm-label">💥 BOOST TẦNG 2 (x lần)</div>
-      <input type="range" id="bm-music-boost" min="0.5" max="20" step="0.5" value="5">
-
-      <div class="bm-label">🔥 MAX BOOST TẦNG 3 (x lần)</div>
-      <input type="range" id="bm-music-max" min="0.5" max="20" step="0.5" value="4">
-
-      <div class="bm-label">🎚 MASTER GAIN CUỐI (x lần)</div>
-      <input type="range" id="bm-music-master" min="0.5" max="10" step="0.5" value="1.5">
-
-      <div class="bm-label">🌊 ĐỘ VANG NHẠC (%)</div>
-      <input type="range" id="bm-music-rev" min="0" max="100" value="20">
-
-      <div class="bm-label" style="display:flex;align-items:center;gap:6px;margin-top:8px;">
-        <input type="checkbox" id="bm-music-loop" checked style="width:auto;">
-        <span>🔁 Lặp lại nhạc</span>
-      </div>
+    <div class="control">
+      <div class="row"><label>🎙️ Âm lượng Mic</label><span id="micVal">1.0x</span></div>
+      <input id="mic" type="range" aria-label="Âm lượng microphone" min="0" max="30" value="10">
     </div>
 
-    <div id="bm-music-total" style="font-size:11px;text-align:center;background:#e8f5e9;color:#2e7d32;font-weight:bold;padding:8px;border-radius:6px;margin-top:10px;">
-      TỔNG GAIN: 60.0x
+    <div class="control">
+      <div class="row"><label>🌌 Độ vang</label><span id="echoVal">0%</span></div>
+      <input id="echo" type="range" aria-label="Độ vang" min="0" max="60" value="0">
     </div>
-  </div>
 
-  <div style="font-size:10px;color:#666;text-align:center;border-top:1px solid #eee;padding-top:10px;margin-top:10px;">
-    🎧 VST 2 TAI - LỌC TẠP ÂM - MIC RÕ TO
+    <div class="control">
+      <div class="row"><label>📢 Độ to</label><span id="gainVal">1.0x</span></div>
+      <input id="gain" type="range" aria-label="Độ to" min="1" max="30" value="10">
+    </div>
+
+    <div class="actions">
+      <button id="reset">🔄 ĐẶT LẠI</button>
+      <button id="hide">❌ ẨN MENU</button>
+    </div>
+
+    <div class="note">📱 Tối ưu cho Kiwi Browser: dùng ngón tay kéo menu và các thanh chỉnh. Nếu trình duyệt hỏi quyền microphone, chọn Cho phép.</div>
+    <div class="note">
+      Âm thanh được xử lý cục bộ trong trình duyệt. Muốn đưa âm thanh đã xử lý vào Discord, cần chọn một thiết bị đầu vào/virtual microphone phù hợp trên hệ điều hành.
+    </div>
   </div>
 </div>
+<button id="open">🌸</button>
 
 <script>
-(function () {
-  'use strict';
-  if (window.__BigSharkMenu__) return;
-  window.__BigSharkMenu__ = true;
+(() => {
+  "use strict";
 
-  const P = {
-    inputGain: 30.0,
-    outputGain: 1.8,
-    bassFreq: 80.0,
-    bassGain: 8.0,
-    midFreq: 1000.0,
-    midGain: 6.0,
-    trebleFreq: 6000.0,
-    trebleGain: 3.0,
-    reverbSolo: 1.40
-  };
-
-  let _ctx = null;
-  let isActive = false;
-  let musicActive = false;
-
-  let micDestNode = null;
-  let micReverbNodes = null;
-
-  let musicBuffer = null;
-  let musicSourceNode = null;
-  let musicGain1 = null;
-  let musicGain2 = null;
-  let musicGain3 = null;
-  let musicComp = null;
-  let musicLimiter = null;
-  let musicDryGain = null;
-  let musicWetGain = null;
-  let musicConvolver = null;
-  let musicFilter = null;
-  let musicLoop = true;
-  let musicMasterGain = null;
-
+  let ctx, source, input, gainNode, delay, feedback, wet, compressor;
   const $ = id => document.getElementById(id);
+  const state = {pitch:1, mic:1, echo:0, gain:1};
 
-  function createReverbBuffer(ctx, duration = 5.0) {
-    const sr = ctx.sampleRate;
-    const len = Math.floor(sr * duration);
-    const impulse = ctx.createBuffer(2, len, sr);
-    const L = impulse.getChannelData(0);
-    const R = impulse.getChannelData(1);
-    for (let i = 0; i < len; i++) {
-      const n = i / len;
-      const k = Math.pow(1 - n, 1.5);
-      L[i] = (Math.random() * 2 - 1) * k;
-      R[i] = (Math.random() * 2 - 1) * k;
-    }
-    return impulse;
-  }
+  function setStatus(t){ $("status").textContent=t; }
 
-  function createCtxSync() {
-    if (_ctx) return _ctx;
-    const AC = window.AudioContext || window.webkitAudioContext;
-    _ctx = new AC({ latencyHint: 'interactive', sampleRate: 48000 });
-    return _ctx;
-  }
+  async function startMic(){
+    try{
+      if(!ctx){
+        ctx = new (window.AudioContext || window.webkitAudioContext)();
+        input = await navigator.mediaDevices.getUserMedia({
+          audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false}
+        });
 
-  function badge(txt, col) {
-    const b = $("bm-st");
-    if (b) { b.innerText = txt; b.style.color = col; }
-  }
+        source = ctx.createMediaStreamSource(input);
+        gainNode = ctx.createGain();
+        delay = ctx.createDelay(1.0);
+        feedback = ctx.createGain();
+        wet = ctx.createGain();
+        compressor = ctx.createDynamicsCompressor();
 
-  const _nativeGUM = navigator.mediaDevices.getUserMedia.bind(navigator.mediaDevices);
-  navigator.mediaDevices.getUserMedia = async function (c) {
-    if (c && c.audio) {
-      c.audio = {
-        autoGainControl: false,
-        echoCancellation: true,
-        noiseSuppression: true,
-        channelCount: 2
-      };
-    }
+        source.connect(gainNode);
+        gainNode.connect(compressor);
 
-    const rawStream = await _nativeGUM(c);
+        // Echo chain
+        gainNode.connect(delay);
+        delay.delayTime.value = .16;
+        delay.connect(feedback);
+        feedback.connect(delay);
+        delay.connect(wet);
+        wet.connect(compressor);
 
-    try {
-      if (!_ctx) createCtxSync();
-      if (_ctx.state === 'suspended') await _ctx.resume();
-
-      const src = _ctx.createMediaStreamSource(rawStream);
-      micDestNode = _ctx.createMediaStreamDestination();
-
-      const noiseGate = _ctx.createDynamicsCompressor();
-      noiseGate.threshold.value = -40.0;
-      noiseGate.ratio.value = 4.0;
-      noiseGate.attack.value = 0.001;
-      noiseGate.release.value = 0.1;
-
-      const bassEQ = _ctx.createBiquadFilter();
-      bassEQ.type = 'lowshelf';
-      bassEQ.frequency.value = P.bassFreq;
-      bassEQ.gain.value = P.bassGain;
-
-      const midEQ = _ctx.createBiquadFilter();
-      midEQ.type = 'peaking';
-      midEQ.frequency.value = P.midFreq;
-      midEQ.Q.value = 0.7;
-      midEQ.gain.value = P.midGain;
-
-      const trebleEQ = _ctx.createBiquadFilter();
-      trebleEQ.type = 'highshelf';
-      trebleEQ.frequency.value = P.trebleFreq;
-      trebleEQ.gain.value = P.trebleGain;
-
-      const lowCut = _ctx.createBiquadFilter();
-      lowCut.type = 'highpass';
-      lowCut.frequency.value = 80.0;
-      lowCut.Q.value = 0.7;
-
-      const highCut = _ctx.createBiquadFilter();
-      highCut.type = 'lowpass';
-      highCut.frequency.value = 16000;
-
-      const inGain = _ctx.createGain();
-      inGain.gain.value = P.inputGain;
-
-      const compressor = _ctx.createDynamicsCompressor();
-      compressor.threshold.value = -12.0;
-      compressor.knee.value = 6.0;
-      compressor.ratio.value = 3.0;
-      compressor.attack.value = 0.005;
-      compressor.release.value = 0.08;
-
-      const outGain = _ctx.createGain();
-      outGain.gain.value = P.outputGain;
-
-      const dryGain = _ctx.createGain();
-      dryGain.gain.value = 1.2;
-
-      const convolver = _ctx.createConvolver();
-      convolver.buffer = createReverbBuffer(_ctx, 5.0);
-
-      const reverbFilter = _ctx.createBiquadFilter();
-      reverbFilter.type = 'peaking';
-      reverbFilter.frequency.value = 2000;
-      reverbFilter.Q.value = 0.5;
-      reverbFilter.gain.value = -3.0;
-
-      const wetGain = _ctx.createGain();
-      wetGain.gain.value = P.reverbSolo;
-
-      const bypassGain = _ctx.createGain();
-      bypassGain.gain.value = 0;
-
-      const micMasterGain = _ctx.createGain();
-      micMasterGain.gain.value = 1;
-
-      src.connect(noiseGate);
-      noiseGate.connect(lowCut);
-      lowCut.connect(bassEQ);
-      bassEQ.connect(midEQ);
-      midEQ.connect(trebleEQ);
-      trebleEQ.connect(highCut);
-      highCut.connect(inGain);
-      inGain.connect(compressor);
-      compressor.connect(outGain);
-
-      outGain.connect(dryGain);
-      dryGain.connect(micMasterGain);
-      outGain.connect(reverbFilter);
-      reverbFilter.connect(convolver);
-      convolver.connect(wetGain);
-      wetGain.connect(micMasterGain);
-
-      src.connect(bypassGain);
-      bypassGain.connect(micMasterGain);
-
-      micMasterGain.connect(micDestNode);
-
-      musicGain1 = _ctx.createGain();
-      musicGain1.gain.value = 2.0;
-
-      musicGain2 = _ctx.createGain();
-      musicGain2.gain.value = 5.0;
-
-      musicGain3 = _ctx.createGain();
-      musicGain3.gain.value = 4.0;
-
-      musicComp = _ctx.createDynamicsCompressor();
-      musicComp.threshold.value = -3.0;
-      musicComp.knee.value = 6.0;
-      musicComp.ratio.value = 2.0;
-      musicComp.attack.value = 0.02;
-      musicComp.release.value = 0.25;
-
-      musicLimiter = _ctx.createDynamicsCompressor();
-      musicLimiter.threshold.value = -0.1;
-      musicLimiter.knee.value = 0;
-      musicLimiter.ratio.value = 10.0;
-      musicLimiter.attack.value = 0.0003;
-      musicLimiter.release.value = 0.02;
-
-      musicMasterGain = _ctx.createGain();
-      musicMasterGain.gain.value = 1.5;
-
-      musicDryGain = _ctx.createGain();
-      musicDryGain.gain.value = 1.0;
-
-      musicConvolver = _ctx.createConvolver();
-      musicConvolver.buffer = createReverbBuffer(_ctx, 5.0);
-
-      musicFilter = _ctx.createBiquadFilter();
-      musicFilter.type = 'peaking';
-      musicFilter.frequency.value = 2000;
-      musicFilter.Q.value = 0.5;
-      musicFilter.gain.value = -3.0;
-
-      musicWetGain = _ctx.createGain();
-      musicWetGain.gain.value = 0.3;
-
-      musicGain1.connect(musicGain2);
-      musicGain2.connect(musicGain3);
-      musicGain3.connect(musicComp);
-      musicComp.connect(musicLimiter);
-      musicLimiter.connect(musicMasterGain);
-
-      musicMasterGain.connect(musicDryGain);
-      musicDryGain.connect(micDestNode);
-
-      musicMasterGain.connect(musicFilter);
-      musicFilter.connect(musicConvolver);
-      musicConvolver.connect(musicWetGain);
-      musicWetGain.connect(micDestNode);
-
-      micReverbNodes = {
-        inGain, bassEQ, midEQ, trebleEQ, wetGain, outGain,
-        noiseGate, compressor, bypassGain, dryGain, micMasterGain
-      };
-
-      badge('🔵 BIG SHARK STANDBY', '#2196F3');
-      return micDestNode.stream;
-    } catch (err) {
-      console.warn('Big Shark Audio Error:', err);
-      return rawStream;
-    }
-  };
-
-  async function loadMusicFile(file) {
-    if (!_ctx) createCtxSync();
-    if (_ctx.state === 'suspended') await _ctx.resume();
-
-    let arrayBuf;
-    try {
-      arrayBuf = await file.arrayBuffer();
-    } catch (e) {
-      arrayBuf = await new Promise((res, rej) => {
-        const fr = new FileReader();
-        fr.onload = () => res(fr.result);
-        fr.onerror = rej;
-        fr.readAsArrayBuffer(file);
-      });
-    }
-
-    const audioBuf = await new Promise((resolve, reject) => {
-      const ret = _ctx.decodeAudioData(
-        arrayBuf,
-        (buf) => resolve(buf),
-        (err) => reject(err || new Error('decode fail'))
-      );
-      if (ret && typeof ret.then === 'function') {
-        ret.then(resolve).catch(reject);
+        compressor.connect(ctx.destination);
       }
+
+      if(ctx.state === "suspended") await ctx.resume();
+      apply();
+      setStatus("ĐANG HOẠT ĐỘNG");
+      $("start").textContent="🎤 MICRO ĐANG BẬT";
+    }catch(e){
+      console.error(e);
+      setStatus("MIC BỊ TỪ CHỐI");
+      alert("Hãy cho phép trình duyệt sử dụng microphone rồi thử lại.");
+    }
+  }
+
+  function apply(){
+    if(!ctx) return;
+    gainNode.gain.setTargetAtTime(state.mic,ctx.currentTime,.03);
+    wet.gain.setTargetAtTime(state.echo,ctx.currentTime,.03);
+    feedback.gain.setTargetAtTime(Math.min(state.echo*.55,.35),ctx.currentTime,.03);
+    compressor.threshold.value=-12;
+    compressor.knee.value=18;
+    compressor.ratio.value=4;
+    compressor.attack.value=.003;
+    compressor.release.value=.12;
+    compressor.connect; // giữ node sống
+  }
+
+  function bindRange(id, key, scale, text){
+    $(id).addEventListener("input", e=>{
+      state[key]=Number(e.target.value)/scale;
+      $(text).textContent =
+        key==="echo" ? Math.round(state[key]*100)+"%" :
+        state[key].toFixed(1)+"x";
+      if(key==="pitch") $("pitchVal").textContent=state[key].toFixed(2)+"x";
+      apply();
     });
-
-    if (!audioBuf || audioBuf.duration === 0) {
-      throw new Error('File audio rỗng hoặc không hợp lệ');
-    }
-    musicBuffer = audioBuf;
-    return audioBuf.duration;
   }
 
-  function stopMusicNode() {
-    if (musicSourceNode) {
-      try { musicSourceNode.stop(0); } catch(e){}
-      try { musicSourceNode.disconnect(); } catch(e){}
-      musicSourceNode = null;
-    }
-  }
+  $("start").onclick=startMic;
 
-  async function playMusic() {
-    if (!musicBuffer) return false;
-    if (!_ctx) createCtxSync();
-    if (_ctx.state === 'suspended') await _ctx.resume();
-
-    stopMusicNode();
-    musicSourceNode = _ctx.createBufferSource();
-    musicSourceNode.buffer = musicBuffer;
-    musicSourceNode.loop = musicLoop;
-    musicSourceNode.connect(musicGain1);
-    musicSourceNode.start(0);
-
-    musicSourceNode.onended = () => {
-      if (!musicLoop && musicActive) {
-        toggleMusic(false);
-        const b = $("bm-music-btn");
-        if (b) { b.innerText = '🎵 BẬT XẢ NHẠC'; b.classList.remove('active'); }
-      }
+  document.querySelectorAll(".voice").forEach(b=>{
+    b.onclick=()=>{
+      document.querySelectorAll(".voice").forEach(x=>x.classList.remove("active"));
+      b.classList.add("active");
+      $("pitch").value=Math.round(Number(b.dataset.pitch)*100);
+      $("echo").value=Math.round(Number(b.dataset.echo)*100);
+      $("pitch").dispatchEvent(new Event("input"));
+      $("echo").dispatchEvent(new Event("input"));
     };
-    return true;
-  }
+  });
 
-  function toggleMusic(on) {
-    musicActive = on;
-    if (!micReverbNodes) return;
+  $("pitch").oninput=e=>{
+    state.pitch=Number(e.target.value)/100;
+    $("pitchVal").textContent=state.pitch.toFixed(2)+"x";
+    /*
+      Web Audio không có pitch-shift độc lập bằng Gain/Delay.
+      Thanh này được giữ làm preset/control UI; để pitch-shift thật cần
+      AudioWorklet/phase-vocoder hoặc thư viện xử lý pitch.
+    */
+  };
+  bindRange("mic","mic",10,"micVal");
+  bindRange("echo","echo",100,"echoVal");
+  bindRange("gain","gain",10,"gainVal");
 
-    if (on) {
-      micReverbNodes.micMasterGain.gain.value = 0;
-      badge('🟣 ĐANG XẢ NHẠC (MIC TẮT)', '#9c27b0');
-    } else {
-      micReverbNodes.micMasterGain.gain.value = 1;
-      badge(
-        isActive ? '🔴 BIG SHARK ACTIVE' : '🔵 BIG SHARK STANDBY',
-        isActive ? '#e74c3c' : '#2196F3'
-      );
-    }
-  }
-
-  function updateTotalGain() {
-    const vol = parseFloat($("bm-music-vol").value);
-    const b2 = parseFloat($("bm-music-boost").value);
-    const b3 = parseFloat($("bm-music-max").value);
-    const master = parseFloat($("bm-music-master").value);
-    const total = (vol / 100) * b2 * b3 * master;
-    const el = $("bm-music-total");
-    if (el) {
-      let color = '#2e7d32';
-      if (total > 200) color = '#e65100';
-      if (total > 500) color = '#c62828';
-      el.style.color = color;
-      el.innerText = 'TỔNG GAIN: ' + total.toFixed(1) + 'x';
-    }
-  }
-
-  $("bm-act").onclick = async () => {
-    if (!_ctx) createCtxSync();
-    if (_ctx.state === 'suspended') await _ctx.resume();
-
-    isActive = !isActive;
-    const btn = $("bm-act");
-
-    if (isActive) {
-      btn.innerText = '✅ ĐANG BẬT (BẤM ĐỂ TẮT)';
-      btn.classList.add('active');
-      if (micReverbNodes) {
-        micReverbNodes.bypassGain.gain.value = 0;
-        micReverbNodes.dryGain.gain.value = 1.2;
-        micReverbNodes.inGain.gain.value = parseFloat($("bm-ingain").value);
-        micReverbNodes.bassEQ.gain.value = parseFloat($("bm-bass").value);
-        micReverbNodes.midEQ.gain.value = parseFloat($("bm-mid").value);
-        micReverbNodes.trebleEQ.gain.value = parseFloat($("bm-treble").value);
-        micReverbNodes.wetGain.gain.value = parseFloat($("bm-rev").value) / 100;
-      }
-      if (!musicActive) badge('🔴 BIG SHARK ACTIVE', '#e74c3c');
-    } else {
-      btn.innerText = '⚡ KÍCH HOẠT BIG SHARK';
-      btn.classList.remove('active');
-      if (micReverbNodes) {
-        micReverbNodes.bypassGain.gain.value = 1;
-        micReverbNodes.dryGain.gain.value = 0;
-        micReverbNodes.wetGain.gain.value = 0;
-      }
-      if (!musicActive) badge('🔵 BIG SHARK STANDBY', '#2196F3');
-    }
+  $("reset").onclick=()=>{
+    $("pitch").value=100;
+    $("mic").value=10;
+    $("echo").value=0;
+    $("gain").value=10;
+    $("pitch").dispatchEvent(new Event("input"));
+    $("mic").dispatchEvent(new Event("input"));
+    $("echo").dispatchEvent(new Event("input"));
+    $("gain").dispatchEvent(new Event("input"));
+    document.querySelector(".voice").click();
   };
 
-  $("bm-file").onchange = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    const nameEl = $("bm-file-name");
-    nameEl.innerText = '⏳ Đang đọc: ' + file.name;
-    nameEl.style.color = '#666';
-    try {
-      const dur = await loadMusicFile(file);
-      const min = Math.floor(dur / 60);
-      const sec = Math.floor(dur % 60);
-      nameEl.innerText = `✅ ${file.name} (${min}:${sec.toString().padStart(2,'0')})`;
-      nameEl.style.color = '#2e7d32';
-    } catch (err) {
-      console.error('Load MP3 error:', err);
-      nameEl.innerText = '❌ Lỗi: ' + (err.message || 'Không đọc được file');
-      nameEl.style.color = '#c62828';
-    }
-  };
+  $("hide").onclick=()=>{$("app").style.display="none";$("open").style.display="block"};
+  $("open").onclick=()=>{$("app").style.display="block";$("open").style.display="none"};
 
-  $("bm-music-btn").onclick = async () => {
-    const btn = $("bm-music-btn");
-    if (!musicActive) {
-      if (!musicBuffer) {
-        alert('⚠️ Bạn chưa chọn file nhạc!\nHãy chọn file MP3 ở trên.');
-        return;
-      }
-      await playMusic();
-      toggleMusic(true);
-      btn.innerText = '🔴 ĐANG XẢ NHẠC (BẤM TẮT)';
-      btn.classList.add('active');
-    } else {
-      stopMusicNode();
-      toggleMusic(false);
-      btn.innerText = '🎵 BẬT XẢ NHẠC';
-      btn.classList.remove('active');
-    }
-  };
-
-  $("bm-ingain").oninput = (e) => {
-    if (micReverbNodes && isActive) micReverbNodes.inGain.gain.value = parseFloat(e.target.value);
-  };
-  $("bm-bass").oninput = (e) => {
-    if (micReverbNodes && isActive) micReverbNodes.bassEQ.gain.value = parseFloat(e.target.value);
-  };
-  $("bm-mid").oninput = (e) => {
-    if (micReverbNodes && isActive) micReverbNodes.midEQ.gain.value = parseFloat(e.target.value);
-  };
-  $("bm-treble").oninput = (e) => {
-    if (micReverbNodes && isActive) micReverbNodes.trebleEQ.gain.value = parseFloat(e.target.value);
-  };
-  $("bm-rev").oninput = (e) => {
-    if (micReverbNodes && isActive) micReverbNodes.wetGain.gain.value = parseFloat(e.target.value) / 100;
-  };
-
-  $("bm-music-vol").oninput = (e) => {
-    if (musicGain1) musicGain1.gain.value = parseFloat(e.target.value) / 100;
-    updateTotalGain();
-  };
-  $("bm-music-boost").oninput = (e) => {
-    if (musicGain2) musicGain2.gain.value = parseFloat(e.target.value);
-    updateTotalGain();
-  };
-  $("bm-music-max").oninput = (e) => {
-    if (musicGain3) musicGain3.gain.value = parseFloat(e.target.value);
-    updateTotalGain();
-  };
-  $("bm-music-master").oninput = (e) => {
-    if (musicMasterGain) musicMasterGain.gain.value = parseFloat(e.target.value);
-    updateTotalGain();
-  };
-  $("bm-music-rev").oninput = (e) => {
-    if (musicWetGain) musicWetGain.gain.value = parseFloat(e.target.value) / 100;
-  };
-  $("bm-music-loop").onchange = (e) => {
-    musicLoop = e.target.checked;
-    if (musicSourceNode) musicSourceNode.loop = musicLoop;
-  };
-
-  updateTotalGain();
+  // Drag menu
+  let drag=false, sx=0, sy=0, ox=0, oy=0;
+  $("head").addEventListener("pointerdown",e=>{
+    drag=true;sx=e.clientX;sy=e.clientY;
+    const r=$("app").getBoundingClientRect();ox=r.left;oy=r.top;
+    $("head").setPointerCapture(e.pointerId);
+  });
+  $("head").addEventListener("pointermove",e=>{
+    if(!drag)return;
+    $("app").style.left=Math.max(0,ox+e.clientX-sx)+"px";
+    $("app").style.top=Math.max(0,oy+e.clientY-sy)+"px";
+  });
+  $("head").addEventListener("pointerup",()=>drag=false);
 })();
 </script>
 </body>
