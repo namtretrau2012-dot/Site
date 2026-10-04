@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>Mic Hook by Ng hnam — Boost Pro</title>
+<title>Mic Hook by Đỗ Quốc Nam — Boost Pro</title>
 <style>
   :root{
     --accent:#ff2d55; --accent2:#7c4dff;
@@ -166,7 +166,7 @@
   <div class="header">
     <div class="logo">🎛️</div>
     <div class="title">
-      <h1>Mic Hook by Ng hnam</h1>
+      <h1>Mic Hook by Đỗ Quốc Nam</h1>
       <small>Boost Pro — Boost · Voice · Split</small>
     </div>
     <div class="tag">K I N G</div>
@@ -190,7 +190,7 @@
       <div class="drop-text">Bấm để chọn nhạc</div>
       <div class="drop-hint">hoặc kéo thả · MP3 WAV M4A FLAC OGG</div>
     </div>
-    <input type="file" id="fileInput" accept="audio/*">
+    <input type="file" id="fileInput" accept="audio/*,.mp3,.wav,.m4a,.flac,.ogg,.opus,.aac">
     <div class="track-info" id="trackInfo" style="display:none;">
       <div class="ic">🎵</div>
       <div class="nm">
@@ -287,7 +287,7 @@
     </div>
   </div>
 
-  <!-- VOCAL BOOST — MỚI -->
+  <!-- VOCAL BOOST -->
   <div class="card" data-tab="vocal">
     <h3>🎤 Vocal Boost <span class="vocal-badge">MỚI</span></h3>
     <div class="hint" style="margin-bottom:12px;">
@@ -433,7 +433,7 @@
     <button class="btn-wide" id="btnExportAudio" disabled>📥 Xuất audio (đã boost)</button>
    </div>
 
-  <div class="footer">Made by <b>Ng hnam</b> · Tag <b>K I N G</b></div>
+  <div class="footer">Made by <b>ĐỖ QUỐC NAM</b> · Tag <b>K I N G</b></div>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -447,11 +447,9 @@
 // ═══════════════════════════════════════════════════════════════════════════
 const state = {
   loop: false,
-  // Boost
   volume: 1.0,
   boostDB: 0,
   gain: 1.0,
-  // EQ
   bass: 0, bassFreq: 200,
   mid: 0, midFreq: 1000,
   treble: 0, trebleFreq: 3000,
@@ -459,25 +457,21 @@ const state = {
   eqBands: [0,0,0,0,0,0,0,0,0,0],
   preset: 'flat',
   eqPreset: 'flat',
-  // VOCAL BOOST
   vocalOn: false,
-  vocalBoost: 100,   // 0..10000 (%)
+  vocalBoost: 100,
   vocalFreq: 1500,
   vocalQ: 1.0,
   deEss: 0,
   vocalPreset: 'off',
-  // Voice
   voiceOn: false,
   voicePreset: 'none',
   pitch: 0,
   rate: 1.0,
   formant: 0,
   robot: 0,
-  // Split
   split: 'off',
   splitAmt: 100,
   width: 100,
-  // More
   reverbOn: false,
   rev: 0,
   limiterOn: true,
@@ -526,6 +520,17 @@ let splitSplitter, splitMidGain, splitSideGainL, splitSideGainR, merger;
 let reverbNode, reverbWet, dryNode;
 let limiterNode, softClipNode, analyserNode, destinationNode;
 
+// DOM refs (declared early so initGraph can attach listeners)
+const drop=$('drop'), fileInput=$('fileInput');
+const trackInfo=$('trackInfo'), trackName=$('trackName'), trackMeta=$('trackMeta');
+const progressWrap=$('progressWrap'), progressBar=$('progressBar'), progressFill=$('progressFill');
+const timeNow=$('timeNow'), timeEnd=$('timeEnd');
+const btnPlay=$('btnPlay'), btnBack=$('btnBack'), btnFwd=$('btnFwd');
+const btnLoop=$('btnLoop'), btnDl=$('btnDl');
+
+let currentFileName='';
+let currentObjectURL=null;
+
 // ── Curves ─────────────────────────────────────────────────────────────
 function makeSatCurve(amount){
   const n=1024, curve=new Float32Array(n), k=amount*100;
@@ -558,14 +563,12 @@ function buildReverbIR(ctx, decay){
   return buf;
 }
 
-// dB → gain (log, cap 1e6)
 function dbToGain(db){
   if(!isFinite(db)||db<=0)return 1;
   const safe=Math.min(db,90000);
   return Math.min(Math.pow(10,safe/20000),1e6);
 }
 
-// Vocal % → gain (100% = 1x, 10000% = 100x)
 function vocalPctToGain(pct){
   return Math.max(0, pct/100);
 }
@@ -578,6 +581,32 @@ function initGraph(){
   audioEl=new Audio();
   audioEl.crossOrigin='anonymous';
   audioEl.preload='auto';
+  audioEl.playsInline=true;
+
+  // ═══ GẮN LISTENER NGAY TẠI ĐÂY ═══
+  audioEl.addEventListener('play', ()=>btnPlay.textContent='⏸');
+  audioEl.addEventListener('pause',()=>btnPlay.textContent='▶');
+  audioEl.addEventListener('timeupdate',()=>{
+    if(!audioEl.duration || !isFinite(audioEl.duration))return;
+    progressFill.style.width=(audioEl.currentTime/audioEl.duration*100)+'%';
+    timeNow.textContent=fmtTime(audioEl.currentTime);
+  });
+  audioEl.addEventListener('loadedmetadata',()=>{
+    timeEnd.textContent=fmtTime(audioEl.duration);
+  });
+  audioEl.addEventListener('ended',()=>{
+    if(state.loop){audioEl.currentTime=0;audioEl.play();}
+    else btnPlay.textContent='▶';
+  });
+  audioEl.addEventListener('error',()=>{
+    const code = audioEl.error ? audioEl.error.code : '?';
+    const msg = {
+      1:'Tải bị hủy', 2:'Lỗi mạng', 3:'Lỗi giải mã (file hỏng?)', 4:'Định dạng không hỗ trợ'
+    }[code] || 'Lỗi không rõ';
+    toastMsg('❌ '+msg);
+    console.error('Audio error code:', code, audioEl.error);
+  });
+
   srcNode=audioCtx.createMediaElementSource(audioEl);
 
   // EQ cơ bản
@@ -688,12 +717,10 @@ function initGraph(){
   node.connect(excNode);    node=excNode;
   node.connect(satNode);    node=satNode;
 
-  // VOCAL BOOST CHAIN
   node.connect(vocalNode);   node=vocalNode;
   node.connect(vocalGain);   node=vocalGain;
   node.connect(deEssNode);   node=deEssNode;
 
-  // Voice
   node.connect(formant1); node=formant1;
   node.connect(formant2); node=formant2;
   node.connect(robotMix);
@@ -705,7 +732,6 @@ function initGraph(){
   node.connect(gainRawNode);  node=gainRawNode;
   node.connect(boostNode);    node=boostNode;
 
-  // Split
   node.connect(splitSplitter);
   splitSplitter.connect(splitMidGain,0);
   splitSplitter.connect(splitSideGainL,0);
@@ -715,7 +741,6 @@ function initGraph(){
   splitSideGainL.connect(merger,0,1);
   splitSideGainR.connect(merger,0,0);
 
-  // Dry + wet reverb
   merger.connect(dryNode);
   merger.connect(reverbNode);
   reverbNode.connect(reverbWet);
@@ -740,12 +765,10 @@ function applyState(){
   if(!audioCtx)return;
   const t=audioCtx.currentTime;
 
-  // Boost
   gainNode.gain.setTargetAtTime(state.volume,t,0.03);
   gainRawNode.gain.setTargetAtTime(state.gain,t,0.03);
   try{boostNode.gain.setValueAtTime(dbToGain(state.boostDB),t);}catch(e){}
 
-  // EQ
   bassNode.frequency.setTargetAtTime(state.bassFreq,t,0.03);
   bassNode.gain.setTargetAtTime(state.bass,t,0.03);
   midNode.frequency.setTargetAtTime(state.midFreq,t,0.03);
@@ -755,10 +778,8 @@ function applyState(){
   excNode.gain.setTargetAtTime(state.exc,t,0.03);
   eqNodes.forEach((f,i)=>f.gain.setTargetAtTime(state.eqBands[i]||0,t,0.03));
 
-  // Saturation
   satNode.curve=makeSatCurve(state.sat);
 
-  // VOCAL BOOST
   const vPct=state.vocalBoost;
   const vGain=state.vocalOn?vocalPctToGain(vPct):1;
   let vFilterDb=0;
@@ -771,7 +792,6 @@ function applyState(){
   try{vocalGain.gain.setValueAtTime(vGain,t);}catch(e){}
   deEssNode.gain.setTargetAtTime(-state.deEss,t,0.03);
 
-  // Voice
   const pitchFactor=Math.pow(2,state.pitch/12);
   if(audioEl)audioEl.playbackRate=state.rate*pitchFactor;
   formant1.gain.setTargetAtTime(state.formant*1.2,t,0.03);
@@ -780,7 +800,6 @@ function applyState(){
   robotGain.gain.setTargetAtTime(state.voiceOn?state.robot:0,t,0.03);
   robotMix.gain.setTargetAtTime(state.voiceOn?(1-state.robot*0.6):1,t,0.03);
 
-  // Split
   const amt=state.splitAmt/100;
   if(state.split==='vocal'){
     splitMidGain.gain.setTargetAtTime(1,t,0.05);
@@ -796,14 +815,11 @@ function applyState(){
     splitSideGainR.gain.setTargetAtTime(1,t,0.05);
   }
 
-  // Reverb
   reverbWet.gain.setTargetAtTime(state.reverbOn?state.rev/100:0,t,0.05);
   dryNode.gain.setTargetAtTime(state.reverbOn?(1-state.rev/200):1,t,0.05);
 
-  // Limiter
   limiterNode.threshold.setTargetAtTime(state.limiterOn?-1:0,t,0.05);
 
-  // Soft clip: bật = tanh curve, tắt = linear
   if(state.softClipOn){
     softClipNode.curve=makeSoftClipCurve();
   }else{
@@ -843,15 +859,6 @@ function updateLabels(){
 // ═══════════════════════════════════════════════════════════════════════════
 //  FILE + PLAYBACK
 // ═══════════════════════════════════════════════════════════════════════════
-const drop=$('drop'), fileInput=$('fileInput');
-const trackInfo=$('trackInfo'), trackName=$('trackName'), trackMeta=$('trackMeta');
-const progressWrap=$('progressWrap'), progressBar=$('progressBar'), progressFill=$('progressFill');
-const timeNow=$('timeNow'), timeEnd=$('timeEnd');
-const btnPlay=$('btnPlay'), btnBack=$('btnBack'), btnFwd=$('btnFwd');
-const btnLoop=$('btnLoop'), btnDl=$('btnDl');
-
-let currentFileName='';
-
 function fmtTime(s){
   if(!isFinite(s))return '0:00';
   s=Math.max(0,Math.floor(s));
@@ -864,73 +871,110 @@ function fmtSize(b){
 }
 
 function loadFile(file){
-  if(!file)return;
-  if(!file.type.startsWith('audio/')&&!/\.(mp3|wav|m4a|flac|ogg|opus|aac)$/i.test(file.name)){
-    toastMsg('❌ File không phải nhạc!');return;
+  if(!file){
+    toastMsg('❌ Không có file!');
+    return;
   }
+
+  // Kiểm tra mở rộng — chấp nhận cả khi file.type rỗng
+  const okExt = /\.(mp3|wav|m4a|flac|ogg|opus|aac|webm|wma|aiff?)$/i.test(file.name);
+  const okMime = file.type && file.type.startsWith('audio/');
+  if(!okExt && !okMime){
+    toastMsg('❌ File không phải nhạc!');
+    return;
+  }
+
   initGraph();
-  if(audioCtx.state==='suspended')audioCtx.resume();
 
-  const url=URL.createObjectURL(file);
-  audioEl.src=url;
+  if(audioCtx.state === 'suspended'){
+    audioCtx.resume().catch(err => console.warn('resume fail:', err));
+  }
+
+  // Giải phóng URL cũ
+  if(currentObjectURL){
+    URL.revokeObjectURL(currentObjectURL);
+    currentObjectURL = null;
+  }
+
+  currentObjectURL = URL.createObjectURL(file);
+  audioEl.src = currentObjectURL;
   audioEl.load();
-  currentFileName=file.name;
+  currentFileName = file.name;
 
-  trackInfo.style.display='flex';
-  progressWrap.style.display='flex';
-  trackName.textContent=file.name;
-  trackMeta.textContent=fmtSize(file.size)+' · '+(file.type||'audio');
-  btnPlay.disabled=btnBack.disabled=btnFwd.disabled=btnDl.disabled=false;
-  $('btnExportAudio').disabled=false;
+  trackInfo.style.display = 'flex';
+  progressWrap.style.display = 'flex';
+  trackName.textContent = file.name;
+  trackMeta.textContent = fmtSize(file.size) + ' · ' + (file.type || 'audio/' + (file.name.split('.').pop()||'?'));
+  btnPlay.disabled = btnBack.disabled = btnFwd.disabled = btnDl.disabled = false;
+  const exp = $('btnExportAudio');
+  if(exp) exp.disabled = false;
 
-  audioEl.onloadedmetadata=()=>{
-    timeEnd.textContent=fmtTime(audioEl.duration);
-    toastMsg('✅ Đã tải: '+file.name);
-  };
-  audioEl.onerror=()=>toastMsg('❌ Không đọc được file!');
+  progressFill.style.width = '0%';
+  timeNow.textContent = '0:00';
+  timeEnd.textContent = '0:00';
+
+  toastMsg('📂 Đang tải: ' + file.name);
 }
 
 drop.addEventListener('click',()=>fileInput.click());
-fileInput.addEventListener('change',e=>loadFile(e.target.files[0]));
-['dragenter','dragover'].forEach(ev=>drop.addEventListener(ev,e=>{
-  e.preventDefault();drop.classList.add('drag');
-}));
-['dragleave','drop'].forEach(ev=>drop.addEventListener(ev,e=>{
-  e.preventDefault();drop.classList.remove('drag');
-}));
-drop.addEventListener('drop',e=>{
-  const f=e.dataTransfer.files[0];
-  if(f)loadFile(f);
+fileInput.addEventListener('change', e => {
+  const f = e.target.files && e.target.files[0];
+  if(f) loadFile(f);
+  e.target.value = '';
 });
 
+['dragenter','dragover'].forEach(ev => drop.addEventListener(ev, e => {
+  e.preventDefault(); e.stopPropagation();
+  drop.classList.add('drag');
+}));
+['dragleave','drop'].forEach(ev => drop.addEventListener(ev, e => {
+  e.preventDefault(); e.stopPropagation();
+  drop.classList.remove('drag');
+}));
+
+drop.addEventListener('drop', e => {
+  const dt = e.dataTransfer;
+  if(!dt) return;
+  let f = dt.files && dt.files[0];
+  if(!f && dt.items){
+    for(const it of dt.items){
+      if(it.kind === 'file'){ f = it.getAsFile(); break; }
+    }
+  }
+  if(f) loadFile(f);
+  else toastMsg('❌ Không tìm thấy file trong drop');
+});
+
+// Ngăn browser mở file khi drop ra ngoài
+['dragover','drop'].forEach(ev =>
+  window.addEventListener(ev, e => e.preventDefault())
+);
+
 function togglePlay(){
-  if(!audioEl||!audioEl.src)return;
-  if(audioCtx.state==='suspended')audioCtx.resume();
-  if(audioEl.paused){audioEl.play();btnPlay.textContent='⏸';}
-  else{audioEl.pause();btnPlay.textContent='▶';}
+  if(!audioEl || !audioEl.src){
+    toastMsg('⚠️ Chưa chọn file nhạc!');
+    return;
+  }
+  if(audioCtx && audioCtx.state === 'suspended'){
+    audioCtx.resume();
+  }
+  if(audioEl.paused){
+    const p = audioEl.play();
+    if(p && p.catch){
+      p.catch(err => {
+        console.error('play() failed:', err);
+        toastMsg('❌ Không phát được: ' + err.message);
+        btnPlay.textContent = '▶';
+      });
+    }
+  } else {
+    audioEl.pause();
+  }
 }
 
-// Event listeners cho audioEl
-const origInitGraph=initGraph;
-initGraph=function(){
-  origInitGraph();
-  if(!audioEl)return;
-  audioEl.addEventListener('play',()=>btnPlay.textContent='⏸');
-  audioEl.addEventListener('pause',()=>btnPlay.textContent='▶');
-  audioEl.addEventListener('timeupdate',()=>{
-    if(!audioEl.duration)return;
-    progressFill.style.width=(audioEl.currentTime/audioEl.duration*100)+'%';
-    timeNow.textContent=fmtTime(audioEl.currentTime);
-  });
-  audioEl.addEventListener('ended',()=>{
-    if(state.loop){audioEl.currentTime=0;audioEl.play();}
-    else btnPlay.textContent='▶';
-  });
-};
-
 btnPlay.addEventListener('click',togglePlay);
-btnBack.addEventListener('click',()=>audioEl.currentTime=Math.max(0,audioEl.currentTime-5));
-btnFwd.addEventListener('click',()=>audioEl.currentTime=Math.min(audioEl.duration||0,audioEl.currentTime+5));
+btnBack.addEventListener('click',()=>{ if(audioEl) audioEl.currentTime=Math.max(0,audioEl.currentTime-5); });
+btnFwd.addEventListener('click',()=>{ if(audioEl) audioEl.currentTime=Math.min(audioEl.duration||0,audioEl.currentTime+5); });
 btnLoop.addEventListener('click',()=>{
   state.loop=!state.loop;
   btnLoop.style.background=state.loop?'linear-gradient(135deg,#ff2d55,#7c4dff)':'';
@@ -945,7 +989,7 @@ btnDl.addEventListener('click',()=>{
   setTimeout(()=>a.remove(),100);
 });
 progressBar.addEventListener('click',e=>{
-  if(!audioEl||!audioEl.duration)return;
+  if(!audioEl||!audioEl.duration||!isFinite(audioEl.duration))return;
   const rect=progressBar.getBoundingClientRect();
   audioEl.currentTime=((e.clientX-rect.left)/rect.width)*audioEl.duration;
 });
@@ -1004,7 +1048,6 @@ for(let i=0;i<10;i++){
   });
 }
 
-// Toggles
 $('vocalOn').addEventListener('change',e=>{state.vocalOn=e.target.checked;applyState();});
 $('voiceOn').addEventListener('change',e=>{state.voiceOn=e.target.checked;applyState();});
 $('reverbOn').addEventListener('change',e=>{state.reverbOn=e.target.checked;applyState();});
@@ -1044,7 +1087,6 @@ document.querySelectorAll('.preset[data-preset]').forEach(btn=>{
   });
 });
 
-// VOCAL PRESETS
 const VOCAL_PRESETS = {
   off:    { vocalOn:false, vocalBoost:100,   vocalFreq:1500, vocalQ:1.0, deEss:0 },
   soft:   { vocalOn:true,  vocalBoost:200,   vocalFreq:1500, vocalQ:1.0, deEss:2 },
@@ -1072,7 +1114,6 @@ document.querySelectorAll('.preset[data-vocal]').forEach(btn=>{
   });
 });
 
-// EQ PRESETS
 const EQ_PRESETS={
   flat:[0,0,0,0,0,0,0,0,0,0],
   pop:[1,2,3,2,0,-1,1,2,3,2],
@@ -1098,7 +1139,6 @@ document.querySelectorAll('.preset[data-eq]').forEach(btn=>{
   });
 });
 
-// VOICE PRESETS
 const VOICE_PRESETS={
   none:{pitch:0,rate:1.0,formant:0,robot:0},
   baby:{pitch:8,rate:1.15,formant:8,robot:0},
@@ -1130,7 +1170,6 @@ document.querySelectorAll('.preset[data-voice]').forEach(btn=>{
   });
 });
 
-// SPLIT PRESETS
 document.querySelectorAll('.preset[data-split]').forEach(btn=>{
   btn.addEventListener('click',()=>{
     state.split=btn.dataset.split;
@@ -1142,7 +1181,6 @@ document.querySelectorAll('.preset[data-split]').forEach(btn=>{
   });
 });
 
-// RESET
 $('btnReset').addEventListener('click',()=>{
   Object.assign(state,{
     loop:false,volume:1.0,boostDB:0,gain:1,
@@ -1191,19 +1229,21 @@ function renderMeter(){
   if(analyserNode){
     const data=new Uint8Array(analyserNode.frequencyBinCount);
     analyserNode.getByteFrequencyData(data);
-    const step=Math.floor(data.length/METER_BARS);
+    const step=Math.max(1,Math.floor(data.length/METER_BARS));
     for(let i=0;i<METER_BARS;i++){
       let s=0;
       for(let j=0;j<step;j++)s+=data[i*step+j]||0;
       const v=s/step/255;
       barEls[i].style.height=Math.max(8,v*100)+'%';
     }
+  } else {
+    barEls.forEach(b => b.style.height = '10%');
   }
   requestAnimationFrame(renderMeter);
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-//  EXPORT AUDIO (realtime record)
+//  EXPORT AUDIO
 // ═══════════════════════════════════════════════════════════════════════════
 async function recordRealtime(durationSec, onProgress){
   const stream=destinationNode.stream;
@@ -1228,7 +1268,6 @@ async function recordRealtime(durationSec, onProgress){
 $('btnExportAudio').addEventListener('click',async()=>{
   if(!audioEl||!audioEl.src)return;
   if(audioCtx.state==='suspended')audioCtx.resume();
-  initGraph();
 
   const wasPlaying=!audioEl.paused;
   if(!wasPlaying)audioEl.play();
@@ -1245,7 +1284,7 @@ $('btnExportAudio').addEventListener('click',async()=>{
   const url=URL.createObjectURL(blob);
   const a=document.createElement('a');
   a.href=url;
-  a.download='boosted_'+(currentFileName||'audio.webm');
+  a.download='boosted_'+(currentFileName||'audio')+'.webm';
   document.body.appendChild(a);a.click();
   setTimeout(()=>{a.remove();URL.revokeObjectURL(url);},200);
   toastMsg('✅ Đã xuất file!');
@@ -1254,7 +1293,8 @@ $('btnExportAudio').addEventListener('click',async()=>{
 // ═══════════════════════════════════════════════════════════════════════════
 //  INIT
 // ═══════════════════════════════════════════════════════════════════════════
-initGraph();
+// KHÔNG gọi initGraph() ở đây — chỉ gọi khi user chọn file
+// (tránh AudioContext bị suspended do không có user gesture)
 applyState();
 renderMeter();
 
