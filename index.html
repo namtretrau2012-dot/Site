@@ -184,15 +184,15 @@
 
   <!-- NHẠC -->
   <div class="card show" data-tab="play">
-    <h3>📁 Chọn file</h3>
+    <h3>📁 Chọn file (Audio / Video)</h3>
     <div class="drop" id="drop">
       <div class="drop-icon">🎵</div>
-      <div class="drop-text">Bấm để chọn nhạc</div>
-      <div class="drop-hint">hoặc kéo thả · MP3 WAV M4A FLAC OGG</div>
+      <div class="drop-text">Bấm để chọn nhạc / video</div>
+      <div class="drop-hint">hoặc kéo thả · MP3 WAV M4A FLAC OGG · MP4 MOV MKV AVI</div>
     </div>
-    <input type="file" id="fileInput" accept="audio/*,.mp3,.wav,.m4a,.flac,.ogg,.opus,.aac">
+    <input type="file" id="fileInput" accept="audio/*,video/*,.mp3,.wav,.m4a,.flac,.ogg,.opus,.aac,.mp4,.mov,.m4v,.mkv,.avi,.3gp,.ts,.webm">
     <div class="track-info" id="trackInfo" style="display:none;">
-      <div class="ic">🎵</div>
+      <div class="ic" id="trackIcon">🎵</div>
       <div class="nm">
         <b id="trackName">Chưa chọn</b>
         <span id="trackMeta">—</span>
@@ -520,9 +520,10 @@ let splitSplitter, splitMidGain, splitSideGainL, splitSideGainR, merger;
 let reverbNode, reverbWet, dryNode;
 let limiterNode, softClipNode, analyserNode, destinationNode;
 
-// DOM refs (declared early so initGraph can attach listeners)
+// DOM refs
 const drop=$('drop'), fileInput=$('fileInput');
 const trackInfo=$('trackInfo'), trackName=$('trackName'), trackMeta=$('trackMeta');
+const trackIcon=$('trackIcon');
 const progressWrap=$('progressWrap'), progressBar=$('progressBar'), progressFill=$('progressFill');
 const timeNow=$('timeNow'), timeEnd=$('timeEnd');
 const btnPlay=$('btnPlay'), btnBack=$('btnBack'), btnFwd=$('btnFwd');
@@ -548,6 +549,12 @@ function makeSoftClipCurve(){
     const x=(i*2)/n-1;
     curve[i]=Math.tanh(x*1.5);
   }
+  return curve;
+}
+
+function makeLinearCurve(){
+  const n=1024, curve=new Float32Array(n);
+  for(let i=0;i<n;i++)curve[i]=(i*2)/n-1;
   return curve;
 }
 
@@ -578,12 +585,18 @@ function initGraph(){
   if(audioCtx)return;
   audioCtx=new (window.AudioContext||window.webkitAudioContext)();
 
-  audioEl=new Audio();
+  // Dùng <video> thay <audio> để chơi được cả MP4/MOV/MKV
+  audioEl=document.createElement('video');
   audioEl.crossOrigin='anonymous';
   audioEl.preload='auto';
   audioEl.playsInline=true;
+  audioEl.setAttribute('playsinline','');
+  audioEl.setAttribute('webkit-playsinline','');
+  audioEl.style.display='none';
+  audioEl.muted=false;
+  document.body.appendChild(audioEl);
 
-  // ═══ GẮN LISTENER NGAY TẠI ĐÂY ═══
+  // Listeners
   audioEl.addEventListener('play', ()=>btnPlay.textContent='⏸');
   audioEl.addEventListener('pause',()=>btnPlay.textContent='▶');
   audioEl.addEventListener('timeupdate',()=>{
@@ -601,10 +614,11 @@ function initGraph(){
   audioEl.addEventListener('error',()=>{
     const code = audioEl.error ? audioEl.error.code : '?';
     const msg = {
-      1:'Tải bị hủy', 2:'Lỗi mạng', 3:'Lỗi giải mã (file hỏng?)', 4:'Định dạng không hỗ trợ'
+      1:'Tải bị hủy', 2:'Lỗi mạng', 3:'Lỗi giải mã (codec không hỗ trợ?)', 4:'Định dạng không hỗ trợ'
     }[code] || 'Lỗi không rõ';
     toastMsg('❌ '+msg);
-    console.error('Audio error code:', code, audioEl.error);
+    console.error('Media error code:', code, audioEl.error);
+    btnPlay.textContent='▶';
   });
 
   srcNode=audioCtx.createMediaElementSource(audioEl);
@@ -793,7 +807,9 @@ function applyState(){
   deEssNode.gain.setTargetAtTime(-state.deEss,t,0.03);
 
   const pitchFactor=Math.pow(2,state.pitch/12);
-  if(audioEl)audioEl.playbackRate=state.rate*pitchFactor;
+  if(audioEl){
+    try{audioEl.playbackRate=state.rate*pitchFactor;}catch(e){}
+  }
   formant1.gain.setTargetAtTime(state.formant*1.2,t,0.03);
   formant2.gain.setTargetAtTime(state.formant*1.0,t,0.03);
   robotOsc.frequency.setTargetAtTime(50+state.robot*200,t,0.03);
@@ -823,9 +839,7 @@ function applyState(){
   if(state.softClipOn){
     softClipNode.curve=makeSoftClipCurve();
   }else{
-    const lin=new Float32Array(1024);
-    for(let i=0;i<1024;i++)lin[i]=(i*2)/1024-1;
-    softClipNode.curve=lin;
+    softClipNode.curve=makeLinearCurve();
   }
 
   updateLabels();
@@ -876,13 +890,17 @@ function loadFile(file){
     return;
   }
 
-  // Kiểm tra mở rộng — chấp nhận cả khi file.type rỗng
-  const okExt = /\.(mp3|wav|m4a|flac|ogg|opus|aac|webm|wma|aiff?)$/i.test(file.name);
-  const okMime = file.type && file.type.startsWith('audio/');
-  if(!okExt && !okMime){
-    toastMsg('❌ File không phải nhạc!');
+  const nameLower = file.name.toLowerCase();
+  const isVideoExt = /\.(mp4|mov|m4v|mkv|avi|3gp|ts|webm|flv|wmv|mpg|mpeg)$/i.test(nameLower);
+  const isAudioExt = /\.(mp3|wav|m4a|flac|ogg|opus|aac|wma|aiff?|amr)$/i.test(nameLower);
+  const okMime = file.type && (file.type.startsWith('audio/') || file.type.startsWith('video/'));
+
+  if(!isAudioExt && !isVideoExt && !okMime){
+    toastMsg('❌ File không phải audio/video!');
     return;
   }
+
+  const isVideo = isVideoExt || (file.type && file.type.startsWith('video/'));
 
   initGraph();
 
@@ -890,7 +908,6 @@ function loadFile(file){
     audioCtx.resume().catch(err => console.warn('resume fail:', err));
   }
 
-  // Giải phóng URL cũ
   if(currentObjectURL){
     URL.revokeObjectURL(currentObjectURL);
     currentObjectURL = null;
@@ -904,7 +921,10 @@ function loadFile(file){
   trackInfo.style.display = 'flex';
   progressWrap.style.display = 'flex';
   trackName.textContent = file.name;
-  trackMeta.textContent = fmtSize(file.size) + ' · ' + (file.type || 'audio/' + (file.name.split('.').pop()||'?'));
+  const kind = isVideo ? '🎬 video' : '🎵 audio';
+  trackMeta.textContent = fmtSize(file.size) + ' · ' + kind;
+  trackIcon.textContent = isVideo ? '🎬' : '🎵';
+
   btnPlay.disabled = btnBack.disabled = btnFwd.disabled = btnDl.disabled = false;
   const exp = $('btnExportAudio');
   if(exp) exp.disabled = false;
@@ -945,7 +965,6 @@ drop.addEventListener('drop', e => {
   else toastMsg('❌ Không tìm thấy file trong drop');
 });
 
-// Ngăn browser mở file khi drop ra ngoài
 ['dragover','drop'].forEach(ev =>
   window.addEventListener(ev, e => e.preventDefault())
 );
@@ -1247,11 +1266,15 @@ function renderMeter(){
 // ═══════════════════════════════════════════════════════════════════════════
 async function recordRealtime(durationSec, onProgress){
   const stream=destinationNode.stream;
-  const recorder=new MediaRecorder(stream,{mimeType:'audio/webm'});
+  let mimeType='audio/webm';
+  if(MediaRecorder.isTypeSupported && MediaRecorder.isTypeSupported('audio/webm;codecs=opus')){
+    mimeType='audio/webm;codecs=opus';
+  }
+  const recorder=new MediaRecorder(stream,{mimeType});
   const chunks=[];
   recorder.ondataavailable=e=>{if(e.data.size)chunks.push(e.data);};
   return new Promise(resolve=>{
-    recorder.onstop=()=>resolve(new Blob(chunks,{type:'audio/webm'}));
+    recorder.onstop=()=>resolve(new Blob(chunks,{type:mimeType}));
     recorder.start();
     const start=Date.now();
     const tick=setInterval(()=>{
@@ -1277,7 +1300,8 @@ $('btnExportAudio').addEventListener('click',async()=>{
   audioEl.currentTime=0;
 
   const blob=await recordRealtime(dur,(p)=>{
-    if(Math.floor(p*100)%10===0)toastMsg(`🎙️ Đang ghi... ${Math.round(p*100)}%`);
+    const pct=Math.round(p*100);
+    if(pct%10===0)toastMsg(`🎙️ Đang ghi... ${pct}%`);
   });
 
   audioEl.pause();
@@ -1293,8 +1317,7 @@ $('btnExportAudio').addEventListener('click',async()=>{
 // ═══════════════════════════════════════════════════════════════════════════
 //  INIT
 // ═══════════════════════════════════════════════════════════════════════════
-// KHÔNG gọi initGraph() ở đây — chỉ gọi khi user chọn file
-// (tránh AudioContext bị suspended do không có user gesture)
+// Không init graph ở đây — chờ user chọn file (tránh AudioContext suspended)
 applyState();
 renderMeter();
 
